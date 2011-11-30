@@ -48,11 +48,24 @@ path {
     fill: none;
 }
 
+path.big {
+  stroke: blue;
+  stroke-width: 2;
+  fill: none;
+}
+
+path.sparkline {
+  stroke: red;
+  stroke-width: 1;
+  fill: none;
+}
+
 line {
-    stroke: black;
+  stroke: black;
+  stroke-width: 1;
 }
 
 text {
-    font-family: Arial;
-    font-size: 9pt;
+  font-family: Arial;
+  font-size: 9pt;
 }

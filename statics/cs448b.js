@@ -1,12 +1,80 @@
 var data = [3, 6, 2, 7, 5, 2, 1, 3, 8, 9, 2, 5, 7];
 var w = 950;
 var h = 500;
-var margin = 40;
-var xOffset = 20;
 
-var y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin, h - margin]);
-var x = d3.scale.linear().domain([0, data.length]).range([0 + margin + xOffset, w - margin + xOffset]);
+// Get a line function with 'interpolation' interpolation ('linear', 'cardinal', 'step-before', etc.)
+function getLine(interpolation, tension, xfn, yfn) {
+  return d3.svg.line()
+    .x(function(d,i) { return xfn(i); })
+    .y(function(d) { return -1 * yfn(d); })
+    .interpolate(interpolation)
+    .tension(tension);
+}
 
+// Draw a graphs labels given its x function, y function, maxX value, and max Y value
+function drawGraphAxis(xfn, yfn, maxX, maxY) {
+  // Draw the X axis
+  g.append("svg:line")
+      .attr("x1", xfn(0))
+      .attr("y1", -1 * yfn(0))
+      .attr("x2", xfn(maxX))
+      .attr("y2", -1 * yfn(0))
+
+  // Draw the Y axis
+  g.append("svg:line")
+      .attr("x1", xfn(0))
+      .attr("y1", -1 * yfn(0))
+      .attr("x2", xfn(0))
+      .attr("y2", -1 * yfn(maxY))
+}
+
+function drawGraphLabels(xfn, yfn, yOffset) {
+  // Draw the x labels
+  g.selectAll(".xLabel")
+      .data(xfn.ticks(5))
+      .enter().append("svg:text")
+      .attr("class", "xLabel")
+      .text(String)
+      .attr("x", function(d) { return xfn(d) })
+      .attr("y", -1*yOffset)
+      .attr("text-anchor", "middle")
+
+  // Draw the y labels
+  g.selectAll(".yLabel")
+      .data(yfn.ticks(4))
+      .enter().append("svg:text")
+      .attr("class", "yLabel")
+      .text(String)
+      .attr("y", function(d) { return -1 * yfn(d) })
+      .attr("text-anchor", "right")
+      .attr("dy", 4)
+}
+
+function drawGraphTicks(xfn, yfn) {
+  // Draw the x ticks 
+  g.selectAll(".xTicks")
+      .data(xfn.ticks(5))
+      .enter().append("svg:line")
+      .attr("class", "xTicks")
+      .attr("x1", function(d) { return xfn(d); })
+      .attr("y1", -1 * yfn(0))
+      .attr("x2", function(d) { return xfn(d); })
+      .attr("y2", -1 * yfn(-0.2));
+  
+  // Draw the y ticks
+  g.selectAll(".yTicks")
+      .data(yfn.ticks(4))
+      .enter().append("svg:line")
+      .attr("class", "yTicks")
+      .attr("y1", function(d) { return -1 * yfn(d); })
+      .attr("x1", xfn(-0.2))
+      .attr("y2", function(d) { return -1 * yfn(d); })
+      .attr("x2", xfn(0));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Init the svg canvas
 var vis = d3.select("#chart")
   .append("svg:svg")
   .attr("width", w)
@@ -14,72 +82,55 @@ var vis = d3.select("#chart")
 
 var g = vis.append("svg:g").attr("transform", "translate(0, " + h + ")");
 
-var line = d3.svg.line()
-    .x(function(d,i) { return x(i); })
-    .y(function(d) { return -1 * y(d); });
+//function draftGraph(data, interpolation, tension, xOffset, yOffset, width, height, margin, drawLabels) {
+function drawGraph(data, xOffset, yOffset, width, height, jsonOptions) {
+  var interpolation = 'interpolation' in jsonOptions ? jsonOptions['interpolation'] : 'linear';
+  var tension = 'tension' in jsonOptions ? jsonOptions['tension'] : 1;
+  var drawLabels = 'drawLabels' in jsonOptions ? jsonOptions['drawLabels'] : false;
+  var drawTicks = 'drawTicks' in jsonOptions ? jsonOptions['drawTicks'] : false;
+  var margin = 'margin' in jsonOptions ? jsonOptions['margin'] : 0;
+  var pathClass = 'pathClass' in jsonOptions ? jsonOptions['pathClass'] : 'big';
+  
+  var y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin + yOffset, height - margin + yOffset]);
+  var x = d3.scale.linear().domain([0, data.length]).range([0 + margin + xOffset, width - margin + xOffset]);
 
-// Get a line function with 'interpolation' interpolation ('linear', 'cardinal', 'step-before', etc.)
-function getLine(interpolation) {
-  return d3.svg.line()
-    .x(function(d,i) { return x(i); })
-    .y(function(d) { return -1 * y(d); })
-    .interpolate(interpolation)
-    .tension(.75);
+  // Get the function to draw the line
+  var lineFn = getLine(interpolation, tension, x, y);
+
+  // Draw the line
+  g.append("svg:path")
+    .attr("d", lineFn(data))
+    .attr("class", pathClass)
+
+  // Draw the X axis
+  drawGraphAxis(x, y, data.length, d3.max(data));
+  
+  // Draw the Y axis if necessary
+  if (drawLabels)
+    drawGraphLabels(x, y, yOffset);
+  
+  if (drawTicks)
+    drawGraphTicks(x, y);
 }
+    
+      
+var sparkLineJson = {
+  'interpolation': 'linear',
+  'tension'      : 0.75,
+  'drawLabels'   : false,
+  'drawTicks'    : false,
+  'margin'       : 0,
+  'pathClass'    : 'sparkline'
+};
+drawGraph(data, 100, 400, 125, 75, sparkLineJson);
+drawGraph(data, 500, 100, 155, 125, sparkLineJson);
 
-var liner = getLine("cardinal");
-//var liner = getLine("linear");
 
-// Draw the line
-g.append("svg:path").attr("d", liner(data))
-
-// Draw the X axis
-g.append("svg:line")
-    .attr("x1", x(0))
-    .attr("y1", -1 * y(0))
-    .attr("x2", x(w))
-    .attr("y2", -1 * y(0))
-
-// Draw the Y axis
-g.append("svg:line")
-    .attr("x1", x(0))
-    .attr("y1", -1 * y(0))
-    .attr("x2", x(0))
-    .attr("y2", -1 * y(d3.max(data)))
-
-g.selectAll(".xLabel")
-    .data(x.ticks(5))
-    .enter().append("svg:text")
-    .attr("class", "xLabel")
-    .text(String)
-    .attr("x", function(d) { return x(d) })
-    .attr("y", 0)
-    .attr("text-anchor", "middle")
-
-g.selectAll(".yLabel")
-    .data(y.ticks(4))
-    .enter().append("svg:text")
-    .attr("class", "yLabel")
-    .text(String)
-    .attr("x", xOffset)
-    .attr("y", function(d) { return -1 * y(d) })
-    .attr("text-anchor", "right")
-    .attr("dy", 4)
-
-g.selectAll(".xTicks")
-    .data(x.ticks(5))
-    .enter().append("svg:line")
-    .attr("class", "xTicks")
-    .attr("x1", function(d) { return x(d); })
-    .attr("y1", -1 * y(0))
-    .attr("x2", function(d) { return x(d); })
-    .attr("y2", -1 * y(-0.3));
-
-g.selectAll(".yTicks")
-    .data(y.ticks(4))
-    .enter().append("svg:line")
-    .attr("class", "yTicks")
-    .attr("y1", function(d) { return -1 * y(d); })
-    .attr("x1", x(-0.3))
-    .attr("y2", function(d) { return -1 * y(d); })
-    .attr("x2", x(0));
+var bigJson = {
+  'interpolation': 'cardinal',
+  'tension'      : 0.75,
+  'drawLabels'   : true,
+  'drawTicks'    : true,
+  'margin'       : 40
+};
+drawGraph(data, 0, 0, w, h, bigJson);
