@@ -1,0 +1,58 @@
+body {
+  font: 14px Helvetica Neue;
+  text-rendering: optimizeLegibility;
+  margin-top: 1em;
+  overflow-y: scroll;
+}
+
+.body {
+  width: 960px;
+  margin: auto;
+}
+
+.content {
+  position: relative;
+  margin-left: 240px;
+}
+
+.gallery {
+  position: relative;
+  left: -240px;
+  width: 970px;
+}
+
+#chart {
+  width: 960px;
+  height: 500px;
+}
+
+.title {
+  font-size: 60px;
+  fill: #555;
+}
+
+p.thank-yous {
+  margin-top: 40px;
+  margin-left: -180px;
+}
+
+ul.thank-yous {
+  font: inherit;
+  position: relative;
+  left: -180px;
+}
+
+path {
+    stroke: green;
+    stroke-width: 2;
+    fill: none;
+}
+
+line {
+    stroke: black;
+}
+
+text {
+    font-family: Arial;
+    font-size: 9pt;
+}
