@@ -58,18 +58,6 @@ path {
     fill: none;
 }
 
-path.big {
-  stroke: blue;
-  stroke-width: 2;
-  fill: none;
-}
-
-path.sparkline {
-  stroke: red;
-  stroke-width: 1;
-  fill: none;
-}
-
 line {
   stroke: black;
   stroke-width: 1;
@@ -96,7 +84,7 @@ background: #E7E7E7;
 #current-words {
   list-style-type: none;
   padding-left: 10px;
-  height: 220px;
+  height: 150px;
   overflow: auto;
 }
 
@@ -122,6 +110,13 @@ background: #E7E7E7;
 #current-words li {
   vertical-align: middle;
   margin-top: 5px;
+  border-top: 1px solid #999999;
+}
+
+#current-words li:first-child {
+  vertical-align: middle;
+  margin-top: 5px;
+  border-top: 0px solid #fff;
 }
 
 .word-list-item {
@@ -141,6 +136,11 @@ background: #E7E7E7;
   border-width:thin;
   border-color: #ccc;
   box-shadow: rgba(0,0,0,0.4) 1px 1px;
+}
+
+#topic-wrap {
+  float:left;
+  display:inline;
 }
 
 #chart-sidebar {

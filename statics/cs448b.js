@@ -1,6 +1,18 @@
-var data = [3, 6, 2, 7, 5, 2, 1, 3, 8, 9, 2, 5, 7];
+var globalCountData = {};
+var data = [2,3,1,5,6,7,8,9,1,3,7,4]; // This isnt really used. Just for a few props.
 var w = 840;
 var h = 540;
+
+var colors = [ '#e41a1c',
+  '#377eb8',
+  '#4daf4a',
+  '#984ea3',
+  '#ff7f00',
+  '#33ff33',
+  '#a65628',
+  '#f781bf',
+  '#999999'
+]
 
 // Get a line function with 'interpolation' interpolation ('linear', 'cardinal', 'step-before', etc.)
 function getLine(interpolation, tension, xfn, yfn) {
@@ -73,19 +85,48 @@ function drawGraphTicks(xfn, yfn) {
 }
 
 // Get the html for a word item in the current word list
-function getWordListItem(text) {
+function getWordListItem(text, color) {
   var ret = 
-    "<li> <span class='word-list-item'>" + text + 
+    "<li> <span class='word-list-item' style='background:" + color + ";'>" + text + 
     "</span><a class='icon-button delete-ci' href='#'><span class='ui-icon ui-icon-closethick' alt='delete'></span></a></li>";
   return ret;
 }
 
+function getRandomData(length){
+  var ret = [], i;
+  for (i = 0; i < length; i++)
+    ret.push(Math.floor(Math.random()*11));
+  
+  return ret;
+}
+
+function getAvailableColor() {
+  var usedColors = [];
+  
+  for (var key in globalCountData)
+    usedColors.push(globalCountData[key]['color']);
+  
+  for (var key in colors)
+    if ( $.inArray(colors[key], usedColors) == -1 )
+      return colors[key];
+    
+  // If all used up, return a random one?
+  return Math.floor(Math.random()*(colors.length));
+}
+
 // Add a new list item to the word list. 
 function addWordToCurrentList(searchText) {
-  $('#current-words').append(getWordListItem(searchText));
-
   // TODO UI STUFF.
-
+  var dataJson = {}; // This would be nice if this could be an object.
+  var color = getAvailableColor();
+  
+  dataJson['data'] = getRandomData(12); // TODO: this will have to be change
+  dataJson['color'] = color;
+  globalCountData[searchText] = dataJson;
+  drawGlobalCountData();
+  
+  $('#current-words').append(getWordListItem(searchText, color));
+  
   // Scroll to the bottom
   $('#current-words').animate({scrollTop: $('#current-words')[0].scrollHeight});
 }
@@ -107,21 +148,24 @@ function drawGraph(data, xOffset, yOffset, width, height, jsonOptions) {
   var drawLabels = 'drawLabels' in jsonOptions ? jsonOptions['drawLabels'] : false;
   var drawTicks = 'drawTicks' in jsonOptions ? jsonOptions['drawTicks'] : false;
   var margin = 'margin' in jsonOptions ? jsonOptions['margin'] : 0;
-  var pathClass = 'pathClass' in jsonOptions ? jsonOptions['pathClass'] : 'big';
+  var color = 'color' in jsonOptions ? jsonOptions['color'] : 'blue';
+  var strokeWidth = 'strokeWidth' in jsonOptions ? jsonOptions['strokeWidth'] : 2;
+
+  var xmax = d3.max(data);
+  var ymax = data.length;
   
-  var y = d3.scale.linear().domain([0, d3.max(data)]).range([0 + margin + yOffset, height - margin + yOffset]);
-  var x = d3.scale.linear().domain([0, data.length]).range([0 + margin + xOffset, width - margin + xOffset]);
+  var y = d3.scale.linear().domain([0, xmax]).range([0 + margin + yOffset, height - margin + yOffset]);
+  var x = d3.scale.linear().domain([0, ymax]).range([0 + margin + xOffset, width - margin + xOffset]);
 
   // Get the function to draw the line
   var lineFn = getLine(interpolation, tension, x, y);
 
-  // Draw the line
-  g.append("svg:path")
+  var path = g.append("svg:path")
     .attr("d", lineFn(data))
-    .attr("class", pathClass)
+    .attr("style", "stroke:"+color+";stroke-width:"+strokeWidth+"px;");
 
   // Draw the X axis
-  drawGraphAxis(x, y, data.length, d3.max(data));
+  drawGraphAxis(x, y, ymax, xmax);
   
   // Draw the Y axis if necessary
   if (drawLabels)
@@ -129,12 +173,76 @@ function drawGraph(data, xOffset, yOffset, width, height, jsonOptions) {
   
   if (drawTicks)
     drawGraphTicks(x, y);
+    
+  return path;
+}
+
+function drawGlobalCountData() {
+    var emptyData = false;
+    var xmax = -1;
+    var ymax = -1;
+    var margin = 30;
+    var xOffset = 0;
+    var yOffset = 0;
+    var height = h;
+    var width = w;
+    
+    for (var key in globalCountData) {
+      xmax = Math.max( xmax, d3.max( globalCountData[key]['data'] ));
+      ymax = Math.max( ymax, globalCountData[key]['data'].length);
+    }
+
+    if (xmax == -1 && ymax == -1) {
+      xmax = 10; 
+      ymax = 10;
+      emptyData = true;
+    }
+
+    var y = d3.scale.linear().domain([0, xmax]).range([0 + margin + yOffset, height - margin + yOffset]);
+    var x = d3.scale.linear().domain([0, ymax]).range([0 + margin + xOffset, width - margin + xOffset]);
+
+    // Get the function to draw the line
+    var lineFn = getLine("cardinal", .85, x, y);
+
+    for (var key in globalCountData) {
+      var dr = globalCountData[key]['data'];
+      var path = g.append("svg:path")
+          .attr("d", lineFn(dr))
+          .attr("style", "stroke:"+globalCountData[key]['color']+";stroke-width:2px;");
+
+      if ('path' in globalCountData[key])     // if an old path exists, remove it
+        globalCountData[key]['path'].remove();
+
+      globalCountData[key]['path'] = path;   // draw the new one
+    }
+
+    drawGraphAxis(x, y, ymax, xmax);
+
+    // Draw the axis and ticks
+    g.selectAll(".xTicks").remove();
+    g.selectAll(".yTicks").remove();
+    drawGraphTicks(x, y);
+    
+    // Draw the Y labels if necessary
+    if (!emptyData) {
+      g.selectAll(".xLabel").remove();
+      g.selectAll(".yLabel").remove();
+      drawGraphLabels(x, y, yOffset);
+    }
 }
 
 function initSidebar() {
   // Bind a click to the 'delete current word item' button
   $('.delete-ci').live("click", function() {
     // TODO UI STUFF
+
+    // Check to see if we have a path object for this word.
+    var text = $(this).closest("li").find("span.word-list-item").text();
+    if (text in globalCountData) {
+      globalCountData[text]['path'].remove();
+      delete globalCountData[text];
+    }
+        
     $(this).closest("li").remove();
     return false;
   });
@@ -142,7 +250,7 @@ function initSidebar() {
   $("#search-box").keyup(function(event){
     if(event.keyCode == 13){
       var searchText = $.trim( $('#search-box').val() );
-            
+      
       if (searchText.length > 0) {
         // Check to see if it was already entered.
         var shouldAppend = true;
@@ -160,7 +268,6 @@ function initSidebar() {
     }
   });
 }
-
 initSidebar();
 
 var sparkLineJson = {
@@ -168,11 +275,11 @@ var sparkLineJson = {
   'drawLabels'   : false,
   'drawTicks'    : false,
   'margin'       : 0,
-  'pathClass'    : 'sparkline'
+  'color'        : 'red',
+  'strokeWidth'  : 1
 };
-drawGraph(data, 100, 400, 125, 75, sparkLineJson);
-drawGraph(data, 500, 100, 155, 125, sparkLineJson);
-
+//drawGraph(data, 100, 400, 125, 75, sparkLineJson);
+//drawGraph(data, 500, 100, 155, 125, sparkLineJson);
 
 var bigJson = {
   'interpolation': 'cardinal',
@@ -181,4 +288,6 @@ var bigJson = {
   'drawTicks'    : true,
   'margin'       : 30
 };
-drawGraph(data, 0, 0, w, h, bigJson);
+//drawGraph(data, 0, 0, w, h, bigJson);
+
+drawGlobalCountData(); // Just draw axis for now.
