@@ -1,5 +1,5 @@
 body {
-  font: 14px Helvetica Neue;
+  font: 13px Helvetica Neue;
   text-rendering: optimizeLegibility;
   margin-top: 1em;
   overflow-y: scroll;
@@ -8,6 +8,10 @@ body {
 .body {
   width: 960px;
   margin: auto;
+}
+
+h1 {
+  margin-bottom: 0px;
 }
 
 .content {
@@ -22,8 +26,12 @@ body {
 }
 
 #chart {
-  width: 960px;
+  width: 1000px;
   height: 500px;
+}
+
+#chart svg {
+  display:inline;
 }
 
 .title {
@@ -31,15 +39,17 @@ body {
   fill: #555;
 }
 
+#thank-yous-wrap {
+  margin-top: 70px;
+  position: relative;
+  left: -50px;
+  display: block;
+}
+
 p.thank-yous {
-  margin-top: 40px;
-  margin-left: -180px;
 }
 
 ul.thank-yous {
-  font: inherit;
-  position: relative;
-  left: -180px;
 }
 
 path {
@@ -68,4 +78,85 @@ line {
 text {
   font-family: Arial;
   font-size: 9pt;
+}
+
+a.icon-button { padding: 1px; display: inline-block; }
+a.icon-button span { margin: 0px 1px 1px 0px; }
+a.icon-button:hover {
+-moz-border-radius: 2px;
+border-radius: 2px;
+border-style:solid;
+border-width:thin;
+border-color: #aaa;
+padding: 0px;
+background: #E7E7E7;
+}
+
+
+#current-words {
+  list-style-type: none;
+  padding-left: 10px;
+  height: 220px;
+  overflow: auto;
+}
+
+#current-words li {
+  valign: middle;
+}
+
+#current-words-wrap {
+  float: left;
+  margin-top: 5px;
+  display: inline;
+}
+
+#current-words-wrap h4 {
+  margin-bottom: 0px;
+}
+
+#current-words {
+  margin-top: 3px;
+  width: 140px;
+}
+
+#current-words li {
+  vertical-align: middle;
+  margin-top: 5px;
+}
+
+.word-list-item {
+  vertical-align: top;
+  position: relative;
+  top: 2px;
+}
+
+#search-wrap {
+  float: left;
+  display: inline;
+  padding: 6px 3px 6px 2px;
+  background: #f6f6f6;
+  
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border-width:thin;
+  border-color: #ccc;
+  box-shadow: rgba(0,0,0,0.4) 1px 1px;
+}
+
+#chart-sidebar {
+  width: 150px;
+  height: 500px;
+  padding-top: 30px;
+  display: inline-block;
+}
+
+.search-sym {
+float: left;
+display: inline;
+position: relative;
+top: 2px;
+}
+
+#current-words li a {
+  float: right;
 }

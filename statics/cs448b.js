@@ -1,6 +1,6 @@
 var data = [3, 6, 2, 7, 5, 2, 1, 3, 8, 9, 2, 5, 7];
-var w = 950;
-var h = 500;
+var w = 840;
+var h = 540;
 
 // Get a line function with 'interpolation' interpolation ('linear', 'cardinal', 'step-before', etc.)
 function getLine(interpolation, tension, xfn, yfn) {
@@ -72,6 +72,24 @@ function drawGraphTicks(xfn, yfn) {
       .attr("x2", xfn(0));
 }
 
+// Get the html for a word item in the current word list
+function getWordListItem(text) {
+  var ret = 
+    "<li> <span class='word-list-item'>" + text + 
+    "</span><a class='icon-button delete-ci' href='#'><span class='ui-icon ui-icon-closethick' alt='delete'></span></a></li>";
+  return ret;
+}
+
+// Add a new list item to the word list. 
+function addWordToCurrentList(searchText) {
+  $('#current-words').append(getWordListItem(searchText));
+
+  // TODO UI STUFF.
+
+  // Scroll to the bottom
+  $('#current-words').animate({scrollTop: $('#current-words')[0].scrollHeight});
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Init the svg canvas
@@ -112,11 +130,41 @@ function drawGraph(data, xOffset, yOffset, width, height, jsonOptions) {
   if (drawTicks)
     drawGraphTicks(x, y);
 }
-    
-      
+
+function initSidebar() {
+  // Bind a click to the 'delete current word item' button
+  $('.delete-ci').live("click", function() {
+    // TODO UI STUFF
+    $(this).closest("li").remove();
+    return false;
+  });
+  
+  $("#search-box").keyup(function(event){
+    if(event.keyCode == 13){
+      var searchText = $.trim( $('#search-box').val() );
+            
+      if (searchText.length > 0) {
+        // Check to see if it was already entered.
+        var shouldAppend = true;
+        $('#current-words li').each( function() {
+          if ($(this).find("span.word-list-item").text().toLowerCase() == searchText.toLowerCase())
+            shouldAppend = false;
+        });
+        
+        if (shouldAppend)
+          addWordToCurrentList(searchText);
+
+        // Clear the search box
+        $('#search-box').val('');
+      }
+    }
+  });
+}
+
+initSidebar();
+
 var sparkLineJson = {
   'interpolation': 'linear',
-  'tension'      : 0.75,
   'drawLabels'   : false,
   'drawTicks'    : false,
   'margin'       : 0,
@@ -131,6 +179,6 @@ var bigJson = {
   'tension'      : 0.75,
   'drawLabels'   : true,
   'drawTicks'    : true,
-  'margin'       : 40
+  'margin'       : 30
 };
 drawGraph(data, 0, 0, w, h, bigJson);
