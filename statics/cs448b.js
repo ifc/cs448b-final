@@ -14,6 +14,9 @@ var colors = [ '#e41a1c',
   '#f781bf',
   '#999999'
 ]
+var maxNumWords = colors.length;
+var activeWordNumber = 0;
+var currentView = 'frequency'; // This should be an enum...
 
 function clearCanvas() {
   g.selectAll("line").remove();
@@ -109,13 +112,15 @@ function getRandomData(length){
 
 function getAvailableColor() {
   var usedColors = [];
-  
+    
   for (var key in globalCountData)
     usedColors.push(globalCountData[key]['color']);
   
-  for (var key in colors)
-    if ( $.inArray(colors[key], usedColors) == -1 )
-      return colors[key];
+  for (var key in colors){
+    var index = (key+activeWordNumber)%maxNumWords;
+    if ( $.inArray(colors[index], usedColors) == -1 )
+      return colors[index];
+  }
     
   // If all used up, return a random one?
   return Math.floor(Math.random()*(colors.length));
@@ -126,16 +131,26 @@ function addWordToCurrentList(searchText) {
   // TODO UI STUFF.
   var dataJson = {}; // This would be nice if this could be an object.
   var color = getAvailableColor();
-  
+        
   dataJson['data'] = getRandomData(12); // TODO: this will have to be change
   dataJson['color'] = color;
   globalCountData[searchText] = dataJson;
-  drawGlobalCountData();
+  updateVisualization();
   
   $('#current-words').append(getWordListItem(searchText, color));
+  activeWordNumber = activeWordNumber + 1;
   
   // Scroll to the bottom
   $('#current-words').animate({scrollTop: $('#current-words')[0].scrollHeight});
+}
+
+function updateVisualization() {
+  clearCanvas();
+  
+  if (currentView == 'frequency')
+    drawGlobalCountData();
+  else
+    drawRelatedData();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,43 +270,7 @@ function drawRelatedData() {
   }
 }
 
-function initSidebar() {
-  // Bind a click to the 'delete current word item' button
-  $('.delete-ci').live("click", function() {
-    // TODO UI STUFF
-
-    // Check to see if we have a path object for this word.
-    var text = $(this).closest("li").find("span.word-list-item").text();
-    if (text in globalCountData) {
-      globalCountData[text]['path'].remove();
-      delete globalCountData[text];
-    }
-        
-    $(this).closest("li").remove();
-    return false;
-  });
-  
-  $("#search-box").keyup(function(event){
-    if(event.keyCode == 13){
-      var searchText = $.trim( $('#search-box').val() );
-      
-      if (searchText.length > 0) {
-        // Check to see if it was already entered.
-        var shouldAppend = true;
-        $('#current-words li').each( function() {
-          if ($(this).find("span.word-list-item").text().toLowerCase() == searchText.toLowerCase())
-            shouldAppend = false;
-        });
-        
-        if (shouldAppend)
-          addWordToCurrentList(searchText);
-
-        // Clear the search box
-        $('#search-box').val('');
-      }
-    }
-  });
-  
+function initRadioSwitch() {
   $('#radio-wrap').buttonset();
   $('#radio-freq').click(function() {
     
@@ -304,8 +283,8 @@ function initSidebar() {
       }
     });
     
-    clearCanvas();
-    drawGlobalCountData();
+    currentView = 'frequency';
+    updateVisualization();
     
     return false;
   });
@@ -320,11 +299,54 @@ function initSidebar() {
       }
     });
     
-    clearCanvas();
-    drawRelatedData();
+    currentView = 'related';
+    updateVisualization();
     
     return false;
   });
+}
+
+function initSidebar() {
+  // Bind a click to the 'delete current word item' button
+  $('.delete-ci').live("click", function() {
+    // TODO UI STUFF
+
+    // Check to see if we have a path object for this word.
+    var text = $(this).closest("li").find("span.word-list-item").text();
+    if (text in globalCountData) {
+      globalCountData[text]['path'].remove();
+      delete globalCountData[text];
+    }
+    updateVisualization();
+        
+    $(this).closest("li").remove();
+    return false;
+  });
+  
+  $("#search-box").keyup(function(event){
+    if(event.keyCode == 13){
+      var searchText = $.trim( $('#search-box').val() );
+            
+      if (searchText.length > 0) {
+        // Check to see if it was already entered.
+        var shouldAppend = true;
+        $('#current-words li').each( function() {
+          if ($(this).find("span.word-list-item").text().toLowerCase() == searchText.toLowerCase())
+            shouldAppend = false;
+        });
+        
+        if ($('#current-words').find("li").length >= maxNumWords )
+          alert("Sorry you have too many active words :(");
+        else if (shouldAppend)
+          addWordToCurrentList(searchText);
+
+        // Clear the search box
+        $('#search-box').val('');
+      }
+    }
+  });
+  
+  initRadioSwitch();
 }
 initSidebar();
 
@@ -348,4 +370,4 @@ var bigJson = {
 };
 //drawGraph(data, 0, 0, w, h, bigJson);
 
-drawGlobalCountData(); // Just draw axis for now.
+updateVisualization(); // Just draw axis for now.
