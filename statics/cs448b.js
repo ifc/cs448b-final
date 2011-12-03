@@ -1,4 +1,5 @@
-var globalCountData = {};
+var globalCountData = {}; // This is one of the keys to this file. It is a dictionary from sidebar
+                          // word to a dictionary to path, data, and color.
 var data = [2,3,1,5,6,7,8,9,1,3,7,4]; // This isnt really used. Just for a few props.
 var w = 840;
 var h = 540;
@@ -13,6 +14,12 @@ var colors = [ '#e41a1c',
   '#f781bf',
   '#999999'
 ]
+
+function clearCanvas() {
+  g.selectAll("line").remove();
+  g.selectAll("text").remove();
+  g.selectAll("path").remove();
+}
 
 // Get a line function with 'interpolation' interpolation ('linear', 'cardinal', 'step-before', etc.)
 function getLine(interpolation, tension, xfn, yfn) {
@@ -231,6 +238,23 @@ function drawGlobalCountData() {
     }
 }
 
+function drawRelatedData() {
+  // TODO DRAW WITH ACTUAL DATA!
+  
+  for (var i = 0; i < 16; i++) {
+    var xOffset = 25 + (i%4) * 200;
+    var yOffset = 25 + Math.floor(i/4) * 135;
+    var data = getRandomData(12); // TODO
+    var path = drawGraph(data, xOffset, yOffset, 135, 80, sparkLineJson);
+    
+    g.append("svg:text")
+        .text("BARBAR") // REPLACE BARBAR with word text
+        .attr("class", "barbar")
+        .attr("y", yOffset-h)
+        .attr("x", xOffset)
+  }
+}
+
 function initSidebar() {
   // Bind a click to the 'delete current word item' button
   $('.delete-ci').live("click", function() {
@@ -266,6 +290,40 @@ function initSidebar() {
         $('#search-box').val('');
       }
     }
+  });
+  
+  $('#radio-wrap').buttonset();
+  $('#radio-freq').click(function() {
+    
+    // STUPID jquery ui seems to not be working... lets do this manually
+    $(this).parent().find("label").each(function() {
+      if ( $(this).attr("for") == "radio-freq" ) {
+        $(this).addClass("ui-state-active");
+      } else if ( $(this).attr("for") == "radio-related" ) {
+        $(this).removeClass("ui-state-active");
+      }
+    });
+    
+    clearCanvas();
+    drawGlobalCountData();
+    
+    return false;
+  });
+  $('#radio-related').click(function() {
+    
+    // STUPID jquery ui seems to not be working... lets do this manually
+    $(this).parent().find("label").each(function() {
+      if ( $(this).attr("for") == "radio-related" ) {
+        $(this).addClass("ui-state-active");
+      } else if ( $(this).attr("for") == "radio-freq" ) {
+        $(this).removeClass("ui-state-active");
+      }
+    });
+    
+    clearCanvas();
+    drawRelatedData();
+    
+    return false;
   });
 }
 initSidebar();

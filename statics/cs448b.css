@@ -107,6 +107,12 @@ background: #E7E7E7;
   width: 140px;
 }
 
+#radio-wrap {
+  float: left;
+  display: inline;
+  vertical-align: bottom;
+}
+
 #current-words li {
   vertical-align: middle;
   margin-top: 5px;
@@ -141,6 +147,7 @@ background: #E7E7E7;
 #topic-wrap {
   float:left;
   display:inline;
+  height: 200px;
 }
 
 #chart-sidebar {
@@ -159,4 +166,29 @@ top: 2px;
 
 #current-words li a {
   float: right;
+}
+
+.ui-buttonset .ui-button {
+margin-left: 0;
+margin-right: -.3em;
+}
+.ui-button .ui-button-text {
+margin: 3px;
+}
+.ui-button-text-only .ui-button-text {
+padding: .1em .1em;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+border: 1px solid lightGrey;
+background: #E6E6E6;
+font-weight: normal;
+color: #555;
+}
+
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+border: 1px solid #AAA;
+background: white;
+font-weight: normal;
+color: #212121;
 }
