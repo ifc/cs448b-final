@@ -192,3 +192,12 @@ background: white;
 font-weight: normal;
 color: #212121;
 }
+
+div.overlay {
+  background: #FEFFD5;
+  border: 1px solid #444;
+}
+
+#overlay-text {
+  margin: 2px;
+}

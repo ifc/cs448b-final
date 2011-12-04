@@ -153,6 +153,17 @@ function updateVisualization() {
     drawRelatedData();
 }
 
+// Draw the popup for this mouseover event
+function drawMouseOverPopup(event, xAxisValue) {
+  $("#overlay-text").text(xAxisValue);
+  $("div.overlay").css("left", event.offsetX - $("#chart").offset().left + "px").css("top", (event.offsetY+40) + "px").css('visibility','visible');
+}
+
+// Remove popup for this mouseout event
+function drawMouseOutPopup(event) {
+  $("div.overlay").css('visibility','hidden');
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Init the svg canvas
@@ -223,6 +234,9 @@ function drawGlobalCountData() {
     var y = d3.scale.linear().domain([0, xmax]).range([0 + margin + yOffset, height - margin + yOffset]);
     var x = d3.scale.linear().domain([0, ymax]).range([0 + margin + xOffset, width - margin + xOffset]);
 
+    var al = $("#chart svg").offset().left;
+    var xinv = d3.scale.linear().domain([0 + margin + xOffset + al, width - margin + xOffset + al]).range([0, ymax]);
+
     // Get the function to draw the line
     var lineFn = getLine("cardinal", .85, x, y);
 
@@ -230,7 +244,14 @@ function drawGlobalCountData() {
       var dr = globalCountData[key]['data'];
       var path = g.append("svg:path")
           .attr("d", lineFn(dr))
-          .attr("style", "stroke:"+globalCountData[key]['color']+";stroke-width:2px;");
+          .attr("style", "stroke:"+globalCountData[key]['color']+";stroke-width:2px;")
+          .on("mouseover", function() {
+            var xAxisValue = Math.round(xinv(d3.event.x)*100)/100;
+            drawMouseOverPopup(d3.event, xAxisValue);
+          })
+          .on("mouseout", function() {
+            drawMouseOutPopup(d3.event);
+          })
 
       if ('path' in globalCountData[key])     // if an old path exists, remove it
         globalCountData[key]['path'].remove();
