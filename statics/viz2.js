@@ -1,12 +1,7 @@
 (function() {
-  var Viz2;
-  Viz2 = (function() {
-    function Viz2() {
-      this.mainSparkline = new SparklinePlot('#js_main_viz', 0, 0, 958, 100);
-    }
-    return Viz2;
-  })();
-  $()(function() {
-    return new Vis2();
+  $(function() {
+    var data;
+    data = [1, 2, 3, 4, 3, 5, 4, 3, 6, 4, 5, 6, 5, 4, 7, 5, 7, 5, 4, 7, 5, 6, 7, 6, 6, 5, 4, 6, 4, 5, 6, 5, 4, 6, 5, 6, 5, 4, 6, 4, 5, 6, 5];
+    return this.mainSparkLine = new SparklinePlot('#js_main_viz', data, 0, 0, 958, 100);
   });
 }).call(this);

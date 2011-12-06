@@ -1,30 +1,29 @@
 (function() {
   var SparklinePlot;
   SparklinePlot = (function() {
-    function SparklinePlot(container, data, xOffset, yOffset, width, height, options) {
-      this.container = container;
-      this.data = data;
-      this.xOffset = xOffset;
-      this.yOffset = yOffset;
-      this.width = width;
-      this.height = height;
-      if (options == null) {
-        options = {};
-      }
-      this.viz = d3.select(this.container).append("svg:svg").attr("width", this.width).attr("height", this.height);
-      this.g = this.vis.append("svg:g").attr("transform", "translate(0, " + this.height + ")");
-      this.options = $.extend({}, this.defaultOptions, options);
-      this.setData(this.data);
-    }
     SparklinePlot.prototype.defaultOptions = {
-      interpolation: 'linear',
+      interpolation: 'cardinal',
       tension: 1,
       drawLabels: false,
       drawTicks: false,
       margin: 0,
       color: 'blue',
-      strokeWidth: 2
+      strokeWidth: 2,
+      width: 958,
+      height: 100,
+      xOffset: 0,
+      yOffset: 0
     };
+    function SparklinePlot(container, data, options) {
+      var vis;
+      if (options == null) {
+        options = {};
+      }
+      this.options = $.extend({}, this.defaultOptions, options);
+      vis = d3.select(container).append("svg:svg").attr("width", this.options.width).attr("height", this.options.height);
+      this.g = vis.append("svg:g").attr("transform", "translate(0, " + this.options.height + ")");
+      this.setData(data);
+    }
     SparklinePlot.prototype.setData = function(data) {
       var xScaleBounds, yScaleBounds;
       this.data = data;
@@ -39,7 +38,7 @@
     SparklinePlot.prototype.draw = function() {
       var lineFn, path;
       lineFn = this.getLine(this.options.interpolation, this.options.tension, this.xScale, this.yScale);
-      path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + color + "; stroke-width: " + strokeWidth + "px;");
+      path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
       this.drawGraphAxis(this.xScale, this.yScale, this.ymax, this.xmax);
       if (this.options.drawLabels) {
         this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
@@ -49,7 +48,7 @@
       }
       return path;
     };
-    SparklinePlot.prototype.getList = function(interpolation, tension, xfn, yfn) {
+    SparklinePlot.prototype.getLine = function(interpolation, tension, xfn, yfn) {
       return d3.svg.line().x(function(d, i) {
         return xfn(i);
       }).y(function(d) {

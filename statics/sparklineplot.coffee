@@ -1,13 +1,4 @@
 class SparklinePlot
-  constructor: (@container, @data, @xOffset, @yOffset, @width, @height, options = {}) ->
-    @viz = d3.select(@container)
-        .append("svg:svg")
-        .attr("width", @width)
-        .attr("height", @height)
-    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@height})")
-    @options = $.extend({}, @defaultOptions, options)
-    @setData(@data)
-
   defaultOptions:
     interpolation: 'linear'
     tension: 1
@@ -16,6 +7,19 @@ class SparklinePlot
     margin: 0
     color: 'blue'
     strokeWidth: 2 
+    width: 958
+    height: 100
+    xOffset: 0
+    yOffset: 0
+  
+  constructor: (container, data, options = {}) ->
+    @options = $.extend({}, @defaultOptions, options)
+    vis = d3.select(container)
+        .append("svg:svg")
+        .attr("width", @options.width)
+        .attr("height", @options.height)
+    @g = vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
+    @setData(data) 
 
   setData: (@data) ->
     @xmax = d3.max(@data)
@@ -30,7 +34,7 @@ class SparklinePlot
     lineFn = @getLine(@options.interpolation, @options.tension, @xScale, @yScale)
     path = @g.append("svg:path")
         .attr("d", lineFn(@data))
-        .attr("style", "stroke: #{color}; stroke-width: #{strokeWidth}px;");
+        .attr("style", "stroke: #{@options.color}; stroke-width: #{@options.strokeWidth}px;");
 
     #Draw the X axis
     @drawGraphAxis(@xScale, @yScale, @ymax, @xmax)
@@ -40,7 +44,7 @@ class SparklinePlot
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
     return path
     
-  getList: (interpolation, tension, xfn, yfn) ->
+  getLine: (interpolation, tension, xfn, yfn) ->
     d3.svg.line()
       .x((d,i) -> xfn(i))
       .y((d) -> -1 * yfn(d))
