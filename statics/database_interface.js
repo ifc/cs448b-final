@@ -2,12 +2,12 @@
 var DatabaseInterface = {
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarLemmasOverPeriod: function(terms, startDate, endDate, callback, maxResults){
+	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults){
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
 			return Query.DocLemmaTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
 		}, this))
-		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults);
+		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults, "JJ");
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
@@ -30,16 +30,18 @@ var DatabaseInterface = {
 		
 	//private
 	
-	_querySimilar: function(url, series, startDate, endDate, callback, maxResults){
+	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, type){
 		maxResults = maxResults || 10
 		var buckets = this._getMonthBuckets(startDate, endDate);
-		Query.arbitraryQuery(url, {
+		var queryParams = {
 			series_: series,
 			buckets_: buckets,
 			includeText_:true,
       threshold_:undefined,
       maxResults_:maxResults,
-		}, callback);
+		}
+		if (type) queryParams['type_'] = type;
+		Query.arbitraryQuery(url, queryParams, callback);
 	},
 	
 	_getDateSpanTerm: function(startDate, endDate){

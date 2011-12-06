@@ -1,0 +1,78 @@
+body {
+  font: 13px Helvetica Neue;
+  text-rendering: optimizeLegibility;
+  margin-top: 1em;
+  overflow-y: scroll;
+  text-align:center;
+}
+
+.body {
+  width: 960px;
+  margin: auto;
+  text-align: left;
+}
+
+#thank-yous-wrap {
+  margin-top: 70px;
+  position: relative;
+  left: -50px;
+  display: block;
+}
+
+#search-wrap {
+  float: left;
+  padding: 6px 3px 6px 2px;
+  background: #f6f6f6;
+  
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border-width:thin;
+  border-color: #ccc;
+  box-shadow: rgba(0,0,0,0.4) 1px 1px;
+}
+
+.attribute_list{
+  width:250px;
+  float:left;
+  margin-left:20px;
+}
+.lists{
+  height:200px;
+}
+.viz_top, .main_viz{
+  margin:10px 0;
+  border:1px solid #777;
+}
+.main_viz{
+  height:100px;
+}
+.cleared{
+  clear:both;
+}
+
+/*********** UI STUFF ******************/
+
+.ui-buttonset .ui-button {
+margin-left: 0;
+margin-right: -.3em;
+}
+.ui-button .ui-button-text {
+margin: 3px;
+}
+.ui-button-text-only .ui-button-text {
+padding: .1em .1em;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+border: 1px solid lightGrey;
+background: #E6E6E6;
+font-weight: normal;
+color: #555;
+}
+
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+border: 1px solid #AAA;
+background: white;
+font-weight: normal;
+color: #212121;
+}
