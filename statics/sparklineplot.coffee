@@ -1,4 +1,13 @@
 class SparklinePlot
+  constructor: (@container, @data, @xOffset, @yOffset, @width, @height, options = {}) ->
+    @viz = d3.select(@container)
+        .append("svg:svg")
+        .attr("width", @width)
+        .attr("height", @height)
+    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@height})")
+    @options = $.extend({}, @defaultOptions, options)
+    @setData(@data)
+
   defaultOptions:
     interpolation: 'linear'
     tension: 1
@@ -7,16 +16,7 @@ class SparklinePlot
     margin: 0
     color: 'blue'
     strokeWidth: 2 
-  
-  constructor: (container, data, @xOffset, @yOffset, @width, @height, options) ->
-    @viz = d3.select(container)
-        .append("svg:svg")
-        .attr("width", @width)
-        .attr("height", @height)
-    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@height})")
-    @options = $.extend({}, @defaultOptions, options)
-    @setData(data)
-    
+
   setData: (@data) ->
     @xmax = d3.max(@data)
     @ymax = data.length
@@ -41,7 +41,7 @@ class SparklinePlot
     return path
     
   getList: (interpolation, tension, xfn, yfn) ->
-    return d3.svg.line()
+    d3.svg.line()
       .x((d,i) -> xfn(i))
       .y((d) -> -1 * yfn(d))
       .interpolate(interpolation)
@@ -90,7 +90,7 @@ class SparklinePlot
         .attr("text-anchor", "right")
         .attr("dy", 4)
   
-  drawGraphAxis: (xfn, yfn, maxX, maxY) {
+  drawGraphAxis: (xfn, yfn, maxX, maxY) ->
     #Draw the X axis
     @g.append("svg:line")
         .attr("x1", xfn(0))
@@ -104,3 +104,5 @@ class SparklinePlot
         .attr("y1", -1 * yfn(0))
         .attr("x2", xfn(0))
         .attr("y2", -1 * yfn(maxY))
+        
+window.SparklinePlot = SparklinePlot

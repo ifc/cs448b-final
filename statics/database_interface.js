@@ -30,7 +30,7 @@ var DatabaseInterface = {
 		
 	//private
 	
-	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, type){
+	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, posPrefix){
 		maxResults = maxResults || 10
 		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = {
@@ -40,7 +40,7 @@ var DatabaseInterface = {
       threshold_:undefined,
       maxResults_:maxResults,
 		}
-		if (type) queryParams['type_'] = type;
+		if (posPrefix) queryParams['posPrefix_'] = posPrefix;
 		Query.arbitraryQuery(url, queryParams, callback);
 	},
 	
