@@ -14,11 +14,11 @@ class SparklinePlot
   
   constructor: (container, data, options = {}) ->
     @options = $.extend({}, @defaultOptions, options)
-    vis = d3.select(container)
+    @vis = d3.select(container)
         .append("svg:svg")
         .attr("width", @options.width)
         .attr("height", @options.height)
-    @g = vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
+    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
     @setData(data) 
 
   setData: (@data) ->
@@ -30,9 +30,10 @@ class SparklinePlot
     @xScale = d3.scale.linear().domain([0, @ymax]).range(xScaleBounds)
     @draw()
     
-  draw: () ->
+  draw: ->
+    @clear()
     lineFn = @getLine(@options.interpolation, @options.tension, @xScale, @yScale)
-    path = @g.append("svg:path")
+    @path = @g.append("svg:path")
         .attr("d", lineFn(@data))
         .attr("style", "stroke: #{@options.color}; stroke-width: #{@options.strokeWidth}px;");
 
@@ -42,7 +43,10 @@ class SparklinePlot
     #Draw the Y axis if necessary
     @drawGraphLabels(@xScale, @yScale, @options.yOffset) if @options.drawLabels    
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
-    return path
+    return @path
+    
+  clear: ->
+    @vis.select('path').remove()
     
   getLine: (interpolation, tension, xfn, yfn) ->
     d3.svg.line()

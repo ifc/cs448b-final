@@ -2,7 +2,7 @@
   var SparklinePlot;
   SparklinePlot = (function() {
     SparklinePlot.prototype.defaultOptions = {
-      interpolation: 'cardinal',
+      interpolation: 'linear',
       tension: 1,
       drawLabels: false,
       drawTicks: false,
@@ -15,13 +15,12 @@
       yOffset: 0
     };
     function SparklinePlot(container, data, options) {
-      var vis;
       if (options == null) {
         options = {};
       }
       this.options = $.extend({}, this.defaultOptions, options);
-      vis = d3.select(container).append("svg:svg").attr("width", this.options.width).attr("height", this.options.height);
-      this.g = vis.append("svg:g").attr("transform", "translate(0, " + this.options.height + ")");
+      this.vis = d3.select(container).append("svg:svg").attr("width", this.options.width).attr("height", this.options.height);
+      this.g = this.vis.append("svg:g").attr("transform", "translate(0, " + this.options.height + ")");
       this.setData(data);
     }
     SparklinePlot.prototype.setData = function(data) {
@@ -36,9 +35,10 @@
       return this.draw();
     };
     SparklinePlot.prototype.draw = function() {
-      var lineFn, path;
+      var lineFn;
+      this.clear();
       lineFn = this.getLine(this.options.interpolation, this.options.tension, this.xScale, this.yScale);
-      path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
+      this.path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
       this.drawGraphAxis(this.xScale, this.yScale, this.ymax, this.xmax);
       if (this.options.drawLabels) {
         this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
@@ -46,7 +46,10 @@
       if (this.options.drawTicks) {
         this.drawGraphTicks(this.xScale, this.yScale);
       }
-      return path;
+      return this.path;
+    };
+    SparklinePlot.prototype.clear = function() {
+      return this.vis.select('path').remove();
     };
     SparklinePlot.prototype.getLine = function(interpolation, tension, xfn, yfn) {
       return d3.svg.line().x(function(d, i) {

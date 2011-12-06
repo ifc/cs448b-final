@@ -12,6 +12,7 @@ var DatabaseInterface = {
 	
 	//callbacks of the form: function(responseCode, results, duration)
 	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults){
+		terms = terms || []
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
 			return Query.DocEntityTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
@@ -22,10 +23,9 @@ var DatabaseInterface = {
 	//callbacks of the form: function(responseCode, results, duration)
 	queryOverPeriod: function(terms, startDate, endDate, callback){
 		var buckets = this._getMonthBuckets(startDate, endDate);
-		Query.arbitraryQuery(Query.BUCKET_DOCS, {
-			series_: this._getSeries(terms),
-			buckets_: buckets
-		}, callback);
+		var queryParams = { buckets_: buckets }
+		if (terms) queryParams['series_'] = this._getSeries(terms)
+		Query.arbitraryQuery(Query.BUCKET_DOCS, queryParams, callback);
 	},
 		
 	//private
@@ -34,12 +34,11 @@ var DatabaseInterface = {
 		maxResults = maxResults || 10
 		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = {
-			series_: series,
-			buckets_: buckets,
 			includeText_:true,
       threshold_:undefined,
       maxResults_:maxResults,
 		}
+		if (series.length > 0) queryParams['series_'] = series
 		if (posPrefix) queryParams['posPrefix_'] = posPrefix;
 		Query.arbitraryQuery(url, queryParams, callback);
 	},
@@ -79,6 +78,7 @@ var DatabaseInterface = {
 			dateIterator.setMonth(month);
 			dateIterator.month += 1
 		}
+		return buckets
 	}
 	
 }

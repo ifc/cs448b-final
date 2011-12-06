@@ -5,6 +5,15 @@ body {
   overflow-y: scroll;
   text-align:center;
 }
+ul{
+  padding:0;
+  margin:0;
+}
+li{
+  padding:0;
+  margin:0;
+  list-style: none;
+}
 
 .body {
   width: 960px;
@@ -38,6 +47,14 @@ body {
 }
 .lists{
   height:200px;
+}
+.lists b{
+  display:inline-block;
+  width:150px;
+}
+.lists span{
+  color:#777;
+  font-size:10px;
 }
 .viz_top, .main_viz{
   margin:10px 0;
