@@ -72,7 +72,7 @@ function drawGraphLabels(xfn, yfn, yOffset) {
       .attr("dy", 4)
 }
 
-function drawGraphTicks(xfn, yfn) {
+function drawGraphTicksAndGrid(xfn, yfn, xmax, ymax) {
   // Draw the x ticks 
   g.selectAll(".xTicks")
       .data(xfn.ticks(5))
@@ -90,6 +90,26 @@ function drawGraphTicks(xfn, yfn) {
       .attr("class", "yTicks")
       .attr("y1", function(d) { return -1 * yfn(d); })
       .attr("x1", xfn(-0.2))
+      .attr("y2", function(d) { return -1 * yfn(d); })
+      .attr("x2", xfn(0));
+      
+  // Draw the x ticks 
+  g.selectAll(".xGrid")
+      .data(xfn.ticks(5))
+      .enter().append("svg:line")
+      .attr("class", "xGrid")
+      .attr("x1", function(d) { return xfn(d); })
+      .attr("y1", -1 * yfn(0))
+      .attr("x2", function(d) { return xfn(d); })
+      .attr("y2", -1 * yfn(xmax));
+
+  // Draw the y ticks
+  g.selectAll(".yGrid")
+      .data(yfn.ticks(4))
+      .enter().append("svg:line")
+      .attr("class", "yGrid")
+      .attr("y1", function(d) { return -1 * yfn(d); })
+      .attr("x1", xfn(ymax))
       .attr("y2", function(d) { return -1 * yfn(d); })
       .attr("x2", xfn(0));
 }
@@ -127,12 +147,11 @@ function getAvailableColor() {
 }
 
 // Add a new list item to the word list. 
-function addWordToCurrentList(searchText) {
-  // TODO UI STUFF.
+function addWordToCurrentList(searchText, data) {
   var dataJson = {}; // This would be nice if this could be an object.
   var color = getAvailableColor();
-        
-  dataJson['data'] = getRandomData(12); // TODO: this will have to be change
+    
+  dataJson['data'] = data[0];
   dataJson['color'] = color;
   globalCountData[searchText] = dataJson;
   updateVisualization();
@@ -193,20 +212,21 @@ function drawGraph(data, xOffset, yOffset, width, height, jsonOptions) {
   // Get the function to draw the line
   var lineFn = getLine(interpolation, tension, x, y);
 
+  // Draw the Y axis if necessary
+  if (drawLabels)
+    drawGraphLabels(x, y, yOffset);
+  
+  if (drawTicks)
+    drawGraphTicksAndGrid(x, y, xmax, ymax);
+
+
   var path = g.append("svg:path")
     .attr("d", lineFn(data))
     .attr("style", "stroke:"+color+";stroke-width:"+strokeWidth+"px;");
 
   // Draw the X axis
   drawGraphAxis(x, y, ymax, xmax);
-  
-  // Draw the Y axis if necessary
-  if (drawLabels)
-    drawGraphLabels(x, y, yOffset);
-  
-  if (drawTicks)
-    drawGraphTicks(x, y);
-    
+      
   return path;
 }
 
@@ -225,8 +245,8 @@ function drawGlobalCountData() {
       ymax = Math.max( ymax, globalCountData[key]['data'].length);
     }
 
-    if (xmax == -1 && ymax == -1) {
-      xmax = 10; 
+    if (xmax <= 0 || ymax <= 0) {
+      xmax = 10;
       ymax = 10;
       emptyData = true;
     }
@@ -240,6 +260,13 @@ function drawGlobalCountData() {
     // Get the function to draw the line
     var lineFn = getLine("cardinal", .85, x, y);
 
+    // Draw the axis and ticks
+    g.selectAll(".xTicks").remove();
+    g.selectAll(".yTicks").remove();
+    g.selectAll(".xGrid").remove();
+    g.selectAll(".yGrid").remove();
+    drawGraphTicksAndGrid(x, y, xmax, ymax);
+
     for (var key in globalCountData) {
       var dr = globalCountData[key]['data'];
       var path = g.append("svg:path")
@@ -251,44 +278,58 @@ function drawGlobalCountData() {
           })
           .on("mouseout", function() {
             drawMouseOutPopup(d3.event);
-          })
+          });
 
       if ('path' in globalCountData[key])     // if an old path exists, remove it
         globalCountData[key]['path'].remove();
 
       globalCountData[key]['path'] = path;   // draw the new one
     }
-
-    drawGraphAxis(x, y, ymax, xmax);
-
-    // Draw the axis and ticks
-    g.selectAll(".xTicks").remove();
-    g.selectAll(".yTicks").remove();
-    drawGraphTicks(x, y);
-    
+        
     // Draw the Y labels if necessary
-    if (!emptyData) {
+    //if (!emptyData) {
       g.selectAll(".xLabel").remove();
       g.selectAll(".yLabel").remove();
       drawGraphLabels(x, y, yOffset);
-    }
+    //}
+
+    drawGraphAxis(x, y, ymax, xmax);
+}
+
+var temper = 0;
+
+function getDataAndDrawSparkline(xOffset, yOffset, term){
+  DatabaseInterface.queryOverPeriod(term, null, null, function(responseCode, results, duration) {
+      var data = results[0]; //getRandomData(12); // TODO
+      var path = drawGraph(data, xOffset, yOffset, 135, 80, sparkLineJson);
+  });
 }
 
 function drawRelatedData() {
   // TODO DRAW WITH ACTUAL DATA!
+  var terms = [];
+  for (var key in globalCountData)
+    terms.push(key);
+
+  var similarTerms = [];  
+  DatabaseInterface.similarEntitiesOverPeriod(terms, null, null, function(responseCode, results, duration) {
+    for (var key in results[0]['entity_'])
+      similarTerms.push(results[0]['entity_'][key]);
+      
+    for (var i = 0; i < 16; i++) {
+      var xOffset = 25 + (i%4) * 200;
+      var yOffset = 25 + Math.floor(i/4) * 135;
+      
+      getDataAndDrawSparkline(xOffset, yOffset, similarTerms[i]);
+
+      g.append("svg:text")
+          .text(similarTerms[i])
+          .attr("class", "barbar")
+          .attr("y", yOffset-h)
+          .attr("x", xOffset)
+    }
+  }, 16);
   
-  for (var i = 0; i < 16; i++) {
-    var xOffset = 25 + (i%4) * 200;
-    var yOffset = 25 + Math.floor(i/4) * 135;
-    var data = getRandomData(12); // TODO
-    var path = drawGraph(data, xOffset, yOffset, 135, 80, sparkLineJson);
-    
-    g.append("svg:text")
-        .text("BARBAR") // REPLACE BARBAR with word text
-        .attr("class", "barbar")
-        .attr("y", yOffset-h)
-        .attr("x", xOffset)
-  }
 }
 
 function initRadioSwitch() {
@@ -330,8 +371,6 @@ function initRadioSwitch() {
 function initSidebar() {
   // Bind a click to the 'delete current word item' button
   $('.delete-ci').live("click", function() {
-    // TODO UI STUFF
-
     // Check to see if we have a path object for this word.
     var text = $(this).closest("li").find("span.word-list-item").text();
     if (text in globalCountData) {
@@ -358,9 +397,12 @@ function initSidebar() {
         
         if ($('#current-words').find("li").length >= maxNumWords )
           alert("Sorry you have too many active words :(");
-        else if (shouldAppend)
-          addWordToCurrentList(searchText);
-
+        else if (shouldAppend) {
+          DatabaseInterface.queryOverPeriod(searchText, null, null, function(responseCode, results, duration){ 
+            addWordToCurrentList(searchText, results);
+          });
+        }
+         
         // Clear the search box
         $('#search-box').val('');
       }

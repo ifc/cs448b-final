@@ -201,3 +201,9 @@ div.overlay {
 #overlay-text {
   margin: 2px;
 }
+
+.yGrid, .xGrid {
+  stroke: #ddd;
+  stroke-width: 1;
+  fill: none; 
+}
