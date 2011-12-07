@@ -115,9 +115,11 @@
       }
     },
     setRelatedAdjectives: function(code, results, duration) {
+      $('#js_related_adj_roller').hide();
       return this.setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_']);
     },
     setRelatedNouns: function(code, results, duration) {
+      $('#js_related_nouns_roller').hide();
       return this.setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_']);
     },
     addTerm: function(term) {
@@ -133,7 +135,6 @@
     },
     setListValues: function(ul, values, counts) {
       var count, currentUl, i, value, _len, _results;
-      $('#js_related_roller').hide();
       currentUl = $(ul);
       _results = [];
       for (i = 0, _len = values.length; i < _len; i++) {

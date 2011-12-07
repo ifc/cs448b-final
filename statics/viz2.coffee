@@ -76,9 +76,11 @@ Viz2 =
       @mainSparkline = new SparklinePlot('#js_main_viz', results[0])
     
   setRelatedAdjectives: (code, results, duration) ->
+    $('#js_related_adj_roller').hide()
     @setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_'])
       
   setRelatedNouns: (code, results, duration) ->
+    $('#js_related_nouns_roller').hide()
     @setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_'])
     
   addTerm: (term) ->
@@ -92,7 +94,6 @@ Viz2 =
     @loadData()
     
   setListValues: (ul, values, counts) ->
-    $('#js_related_roller').hide()
     currentUl = $(ul)
     for value, i in values
       count = counts[i]
