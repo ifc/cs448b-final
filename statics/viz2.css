@@ -5,6 +5,15 @@ body {
   overflow-y: scroll;
   text-align:center;
 }
+ul{
+  padding:0;
+  margin:0;
+}
+li{
+  padding:0;
+  margin:0;
+  list-style: none;
+}
 
 .body {
   width: 960px;
@@ -19,6 +28,25 @@ body {
   display: block;
 }
 
+.extra_terms {
+  float:left;
+}
+.extra_term{
+  position: relative;
+  display:inline-block;
+  padding:5px;
+  background: #1e90ff;
+  color:white;
+}
+.extra_term a{
+  position: absolute;
+  display: block;
+  color:white;
+  border:1px solid white;
+  top:0;
+  right:0;
+  text-decoration:none;
+}
 #search-wrap {
   float: left;
   padding: 6px 3px 6px 2px;
@@ -32,14 +60,40 @@ body {
 }
 
 .attribute_list{
-  width:250px;
+  width:200px;
   float:left;
   margin-left:20px;
 }
 .lists{
-  height:200px;
+  height:250px;
 }
-
+.lists li{
+  position: relative;
+  border:1px solid #777777;
+  margin-bottom:5px;
+  padding:3px 3px 1px;
+  cursor:pointer;
+}
+.lists li:hover{
+  -moz-box-shadow: 0 0 3px #888;
+  -webkit-box-shadow: 0 0 3px #888;
+  box-shadow: 0 0 3px #888;
+  border: 1px solid #63e763;
+}
+.lists .header{
+  display:inline-block;
+  width:150px;
+}
+.lists .count{
+  color:#777;
+  font-size:10px;
+  position: absolute;
+  top:3px;
+  right:3px;
+}
+.minigraph{
+  height:20px;
+}
 .viz_top, .main_viz{
   margin:10px 0;
   border:1px solid #777;
@@ -49,6 +103,11 @@ body {
 }
 .cleared{
   clear:both;
+}
+path {
+    stroke: green;
+    stroke-width: 2;
+    fill: none;
 }
 
 /*********** UI STUFF ******************/

@@ -2,29 +2,35 @@
 var DatabaseInterface = {
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults){
+	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults, useAnd){
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
 			return Query.DocLemmaTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
 		}, this))
+		if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
 		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults, "JJ");
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults){
+	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults, useAnd){
 		terms = terms || []
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
-			return Query.DocEntityTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
+			return Query.DocEntityTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate)));
 		}, this))
+		if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
 		this._querySimilar(Query.QUERY_ENTITIES, wrappedSeries, startDate, endDate, callback, maxResults);
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	queryOverPeriod: function(terms, startDate, endDate, callback){
+	queryOverPeriod: function(terms, startDate, endDate, callback, useAnd){
 		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = { buckets_: buckets }
-		if (terms) queryParams['series_'] = this._getSeries(terms)
+		if (terms) {
+			var series = this._getSeries(terms)
+			if (useAnd && series.length > 1) series = Query.AndTerm.apply(this, series);
+			queryParams['series_'] = series
+		}
 		Query.arbitraryQuery(Query.BUCKET_DOCS, queryParams, callback);
 	},
 		

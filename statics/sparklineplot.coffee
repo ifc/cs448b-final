@@ -2,8 +2,9 @@ class SparklinePlot
   defaultOptions:
     interpolation: 'linear'
     tension: 1
-    drawLabels: false
-    drawTicks: false
+    drawXLabels: false
+    drawYLabels: true
+    drawTicks: true
     margin: 0
     color: 'blue'
     strokeWidth: 2 
@@ -41,7 +42,7 @@ class SparklinePlot
     @drawGraphAxis(@xScale, @yScale, @ymax, @xmax)
     
     #Draw the Y axis if necessary
-    @drawGraphLabels(@xScale, @yScale, @options.yOffset) if @options.drawLabels    
+    @drawGraphLabels(@xScale, @yScale, @options.yOffset)   
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
     return @path
     
@@ -80,23 +81,25 @@ class SparklinePlot
         .attr("x2", xfn(0))
         
   drawGraphLabels: (xfn, yfn, yOffset) ->
-    @g.selectAll(".xLabel")
-        .data(xfn.ticks(5))
-        .enter().append("svg:text")
-        .attr("class", "xLabel")
-        .text(String)
-        .attr("x", (d) -> xfn(d))
-        .attr("y", -1*yOffset)
-        .attr("text-anchor", "middle")
-  
-    @g.selectAll(".yLabel")
-        .data(yfn.ticks(4))
-        .enter().append("svg:text")
-        .attr("class", "yLabel")
-        .text(String)
-        .attr("y", (d) -> -1 * yfn(d))
-        .attr("text-anchor", "right")
-        .attr("dy", 4)
+    if @options.drawXLabels
+      @g.selectAll(".xLabel")
+          .data(xfn.ticks(5))
+          .enter().append("svg:text")
+          .attr("class", "xLabel")
+          .text(String)
+          .attr("x", (d) -> xfn(d))
+          .attr("y", -1*yOffset)
+          .attr("text-anchor", "middle")
+    
+    if @options.drawYLabels
+      @g.selectAll(".yLabel")
+          .data(yfn.ticks(4))
+          .enter().append("svg:text")
+          .attr("class", "yLabel")
+          .text(String)
+          .attr("y", (d) -> -1 * yfn(d))
+          .attr("text-anchor", "right")
+          .attr("dy", 4)
   
   drawGraphAxis: (xfn, yfn, maxX, maxY) ->
     #Draw the X axis

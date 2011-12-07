@@ -4,8 +4,9 @@
     SparklinePlot.prototype.defaultOptions = {
       interpolation: 'linear',
       tension: 1,
-      drawLabels: false,
-      drawTicks: false,
+      drawXLabels: false,
+      drawYLabels: true,
+      drawTicks: true,
       margin: 0,
       color: 'blue',
       strokeWidth: 2,
@@ -40,9 +41,7 @@
       lineFn = this.getLine(this.options.interpolation, this.options.tension, this.xScale, this.yScale);
       this.path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
       this.drawGraphAxis(this.xScale, this.yScale, this.ymax, this.xmax);
-      if (this.options.drawLabels) {
-        this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
-      }
+      this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
       if (this.options.drawTicks) {
         this.drawGraphTicks(this.xScale, this.yScale);
       }
@@ -76,16 +75,20 @@
       }).attr("x2", xfn(0));
     };
     SparklinePlot.prototype.drawGraphLabels = function(xfn, yfn, yOffset) {
-      this.g.selectAll(".xLabel").data(xfn.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
-        return xfn(d);
-      }).attr("y", -1 * yOffset).attr("text-anchor", "middle");
-      return this.g.selectAll(".yLabel").data(yfn.ticks(4)).enter().append("svg:text").attr("class", "yLabel").text(String).attr("y", function(d) {
-        return -1 * yfn(d);
-      }).attr("text-anchor", "right").attr("dy", 4);
+      if (this.options.drawXLabels) {
+        this.g.selectAll(".xLabel").data(xfn.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
+          return xfn(d);
+        }).attr("y", -1 * yOffset).attr("text-anchor", "middle");
+      }
+      if (this.options.drawYLabels) {
+        return this.g.selectAll(".yLabel").data(yfn.ticks(4)).enter().append("svg:text").attr("class", "yLabel").text(String).attr("y", function(d) {
+          return -1 * yfn(d);
+        }).attr("text-anchor", "right").attr("dy", 4);
+      }
     };
     SparklinePlot.prototype.drawGraphAxis = function(xfn, yfn, maxX, maxY) {
       this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(maxX)).attr("y2", -1 * yfn(0));
-      return this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(0)).attr("y2", -1 * yfn(maxY));
+      return this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(0)).attr("y2", -1 * yfn(maxY)).attr("y2", -1 * yfn(maxY));
     };
     return SparklinePlot;
   })();
