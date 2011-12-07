@@ -58,17 +58,18 @@ Viz2 =
     @loadData()
     
   loadData: ->
+    $('.js_roller').show()
     @term = $.trim(@search.val())
     @term = null if @term == ""
-    @terms.push(@term)
+    #@terms.push(@term)
     @mainSparkline.clear() if @mainSparkline
-    $('#js_related_nouns').empty()
-    $('#js_related_adj').empty()
-    DatabaseInterface.queryOverPeriod(@terms, null, null, $.proxy(@drawGraph, this))
-    DatabaseInterface.similarEntitiesOverPeriod(@terms, null, null, $.proxy(@setRelatedNouns, this), 5)
-    DatabaseInterface.similarAdjectivesOverPeriod(@terms, null, null, $.proxy(@setRelatedAdjectives, this), 5)
+    $('.js_attr_list').empty()
+    DatabaseInterface.queryOverPeriod(@term, null, null, $.proxy(@drawGraph, this))
+    DatabaseInterface.similarEntitiesOverPeriod(@term, null, null, $.proxy(@setRelatedNouns, this), 10)
+    DatabaseInterface.similarAdjectivesOverPeriod(@term, null, null, $.proxy(@setRelatedAdjectives, this), 10)
   
   drawGraph: (code, results, duration) ->
+    $('#js_sparkline_roller').hide()
     if @mainSparkline
       @mainSparkline.setData(results[0]) 
     else
@@ -91,10 +92,12 @@ Viz2 =
     @loadData()
     
   setListValues: (ul, values, counts) ->
-    ul = $(ul)
+    $('#js_related_roller').hide()
+    currentUl = $(ul)
     for value, i in values
       count = counts[i]
-      new SimilarityResult(ul, value, count, [],
+      currentUl = $(ul + '2') if i > 4
+      new SimilarityResult(currentUl, value, count, [],
         onClick: (result) =>
           @setTerm(result.term)
           #@addTerm(result.term)

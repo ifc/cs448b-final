@@ -93,21 +93,21 @@
       return this.loadData();
     },
     loadData: function() {
+      $('.js_roller').show();
       this.term = $.trim(this.search.val());
       if (this.term === "") {
         this.term = null;
       }
-      this.terms.push(this.term);
       if (this.mainSparkline) {
         this.mainSparkline.clear();
       }
-      $('#js_related_nouns').empty();
-      $('#js_related_adj').empty();
-      DatabaseInterface.queryOverPeriod(this.terms, null, null, $.proxy(this.drawGraph, this));
-      DatabaseInterface.similarEntitiesOverPeriod(this.terms, null, null, $.proxy(this.setRelatedNouns, this), 5);
-      return DatabaseInterface.similarAdjectivesOverPeriod(this.terms, null, null, $.proxy(this.setRelatedAdjectives, this), 5);
+      $('.js_attr_list').empty();
+      DatabaseInterface.queryOverPeriod(this.term, null, null, $.proxy(this.drawGraph, this));
+      DatabaseInterface.similarEntitiesOverPeriod(this.term, null, null, $.proxy(this.setRelatedNouns, this), 10);
+      return DatabaseInterface.similarAdjectivesOverPeriod(this.term, null, null, $.proxy(this.setRelatedAdjectives, this), 10);
     },
     drawGraph: function(code, results, duration) {
+      $('#js_sparkline_roller').hide();
       if (this.mainSparkline) {
         return this.mainSparkline.setData(results[0]);
       } else {
@@ -132,13 +132,17 @@
       return this.loadData();
     },
     setListValues: function(ul, values, counts) {
-      var count, i, value, _len, _results;
-      ul = $(ul);
+      var count, currentUl, i, value, _len, _results;
+      $('#js_related_roller').hide();
+      currentUl = $(ul);
       _results = [];
       for (i = 0, _len = values.length; i < _len; i++) {
         value = values[i];
         count = counts[i];
-        _results.push(new SimilarityResult(ul, value, count, [], {
+        if (i > 4) {
+          currentUl = $(ul + '2');
+        }
+        _results.push(new SimilarityResult(currentUl, value, count, [], {
           onClick: __bind(function(result) {
             return this.setTerm(result.term);
           }, this)
