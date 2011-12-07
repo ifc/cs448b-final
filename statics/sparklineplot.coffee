@@ -7,16 +7,20 @@ class SparklinePlot
     margin: 0
     color: 'blue'
     strokeWidth: 2 
+    width: 958
+    height: 100
+    xOffset: 0
+    yOffset: 0
   
-  constructor: (container, data, @xOffset, @yOffset, @width, @height, options) ->
-    @viz = d3.select(container)
-        .append("svg:svg")
-        .attr("width", @width)
-        .attr("height", @height)
-    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@height})")
+  constructor: (container, data, options = {}) ->
     @options = $.extend({}, @defaultOptions, options)
-    @setData(data)
-    
+    @vis = d3.select(container)
+        .append("svg:svg")
+        .attr("width", @options.width)
+        .attr("height", @options.height)
+    @g = @vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
+    @setData(data) 
+
   setData: (@data) ->
     @xmax = d3.max(@data)
     @ymax = data.length
@@ -26,11 +30,12 @@ class SparklinePlot
     @xScale = d3.scale.linear().domain([0, @ymax]).range(xScaleBounds)
     @draw()
     
-  draw: () ->
+  draw: ->
+    @clear()
     lineFn = @getLine(@options.interpolation, @options.tension, @xScale, @yScale)
-    path = @g.append("svg:path")
+    @path = @g.append("svg:path")
         .attr("d", lineFn(@data))
-        .attr("style", "stroke: #{color}; stroke-width: #{strokeWidth}px;");
+        .attr("style", "stroke: #{@options.color}; stroke-width: #{@options.strokeWidth}px;");
 
     #Draw the X axis
     @drawGraphAxis(@xScale, @yScale, @ymax, @xmax)
@@ -38,10 +43,13 @@ class SparklinePlot
     #Draw the Y axis if necessary
     @drawGraphLabels(@xScale, @yScale, @options.yOffset) if @options.drawLabels    
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
-    return path
+    return @path
     
-  getList: (interpolation, tension, xfn, yfn) ->
-    return d3.svg.line()
+  clear: ->
+    @vis.select('path').remove()
+    
+  getLine: (interpolation, tension, xfn, yfn) ->
+    d3.svg.line()
       .x((d,i) -> xfn(i))
       .y((d) -> -1 * yfn(d))
       .interpolate(interpolation)
@@ -90,7 +98,7 @@ class SparklinePlot
         .attr("text-anchor", "right")
         .attr("dy", 4)
   
-  drawGraphAxis: (xfn, yfn, maxX, maxY) {
+  drawGraphAxis: (xfn, yfn, maxX, maxY) ->
     #Draw the X axis
     @g.append("svg:line")
         .attr("x1", xfn(0))
@@ -104,3 +112,6 @@ class SparklinePlot
         .attr("y1", -1 * yfn(0))
         .attr("x2", xfn(0))
         .attr("y2", -1 * yfn(maxY))
+        .attr("y2", -1 * yfn(maxY))
+        
+window.SparklinePlot = SparklinePlot
