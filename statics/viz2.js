@@ -90,7 +90,12 @@
           return this.loadData();
         }
       }, this));
-      return this.loadData();
+      this.loadData();
+      return $('#js_filter_entities').change(__bind(function() {
+        if (this.mainSparkline) {
+          return this.loadRelatedData();
+        }
+      }, this));
     },
     loadData: function() {
       $('.js_roller').show();
@@ -107,8 +112,7 @@
     loadRelatedData: function() {
       $('.js_attr_list').empty();
       this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
-      DatabaseInterface.similarEntitiesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedNouns, this), 10);
-      return DatabaseInterface.similarAdjectivesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedAdjectives, this), 10);
+      return DatabaseInterface.similarEntitiesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedNouns, this), 15, this.getEntityType());
     },
     drawGraph: function(code, results, duration) {
       $('#js_sparkline_roller').hide();
@@ -125,6 +129,15 @@
           }, this)
         });
       }
+    },
+    getEntityType: function() {
+      var options;
+      this.filteringEntity = $('input[name=js_filter_entities]:checked').val();
+      options = {};
+      if (this.filteringEntity !== 'all') {
+        options.type = this.filteringEntity;
+      }
+      return options;
     },
     setRelatedAdjectives: function(code, results, duration) {
       $('#js_related_adj_roller').hide();
@@ -156,6 +169,9 @@
         count = counts[i];
         if (i > 4) {
           currentUl = $(ul + '2');
+        }
+        if (i > 9) {
+          currentUl = $(ul + '3');
         }
         _results.push(new SimilarityResult(currentUl, value, count, [], {
           onClick: __bind(function(result) {

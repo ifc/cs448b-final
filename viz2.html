@@ -20,30 +20,49 @@
             <div class="cleared"></div>
             <div class="viz" id="js_viz">
             	<div class="viz_top">
-	            	<div class="top_labels">
-	            		<h2 class="attribute_list">
-	            			Related Nouns
-	            		</h2>
-	            		<div class="attribute_list">
-	            			<img src="statics/images/roller.gif" id="js_related_nouns_roller" class="js_roller" />
+            		<div class="right_side">
+	            		<div class="right_filters">
+	            			<h4>View Related</h4>
+	            			<form id="js_filter_entities">
+		            			<ul>
+		            				<li>
+		            					<input type="radio" value="PERSON" id="js_view_people" name="js_filter_entities" />
+		            					<label for="js_view_people">People</label>
+		            				</li>
+		            				<li>
+		            					<input type="radio" value="LOCATION" id="js_view_places" name="js_filter_entities" />
+		            					<label for="js_view_places">Places</label>
+		            				</li>
+		            				<li>
+		            					<input type="radio" value="ORGANIZATION" id="js_view_orgs" name="js_filter_entities" />
+		            					<label for="js_view_orgs">Organizations</label>
+		            				</li>
+		            				<li>
+		            					<input type="radio" value="all" id="js_view_all" checked="true" name="js_filter_entities" />
+		            					<label for="js_view_all">All</label>
+		            				</li>
+		            			</ul>
+	            			</form>
 	            		</div>
-	            		<h2 class="attribute_list">
-	            			Related Adjectives
-	            		</h2>
-	            		<div class="attribute_list">
-	            			<img src="statics/images/roller.gif" id="js_related_adj_roller" class="js_roller" />
-	            		</div>
-	            		<div class="cleared"></div>
 	            	</div>
-	            	<div class="lists">
-	            		<ul class="attribute_list js_attr_list js_nouns_list" id="js_related_nouns">
-	            		</ul>
-	            		<ul class="attribute_list js_attr_list js_nouns_list" id="js_related_nouns2">
-	            		</ul>
-	            		<ul class="attribute_list js_attr_list js_adj_list" id="js_related_adj">
-	            		</ul>
-	            		<ul class="attribute_list js_attr_list js_adj_list" id="js_related_adj2">
-	            		</ul>
+            		<div class="left_side">
+		            	<div class="top_labels">
+		            		<h2 class="attribute_list">
+		            			Related Terms
+		            		</h2>
+		            		<div class="attribute_list">
+		            			<img src="statics/images/roller.gif" id="js_related_nouns_roller" class="js_roller" />
+		            		</div>
+		            		<div class="cleared_left"></div>
+		            	</div>
+		            	<div class="lists">
+		            		<ul class="attribute_list js_attr_list js_nouns_list" id="js_related_nouns">
+		            		</ul>
+		            		<ul class="attribute_list js_attr_list js_nouns_list" id="js_related_nouns2">
+		            		</ul>
+		            		<ul class="attribute_list js_attr_list js_nouns_list" id="js_related_nouns3">
+		            		</ul>
+		            	</div>
 	            	</div>
             	</div>
             	<div class="main_viz" id="js_main_viz">

@@ -56,6 +56,7 @@ Viz2 =
     @search.keyup (event) =>
       @loadData() if event.keyCode == 13
     @loadData()
+    $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
     
   loadData: ->
     $('.js_roller').show()
@@ -69,8 +70,9 @@ Viz2 =
   loadRelatedData: ->
     $('.js_attr_list').empty()
     @timeSpan = if @mainSparkline then @mainSparkline.getDateRange() else {}
-    DatabaseInterface.similarEntitiesOverPeriod(@term, @timeSpan.start, @timeSpan.end, $.proxy(@setRelatedNouns, this), 10)
-    DatabaseInterface.similarAdjectivesOverPeriod(@term, @timeSpan.start, @timeSpan.end, $.proxy(@setRelatedAdjectives, this), 10)
+    
+    DatabaseInterface.similarEntitiesOverPeriod(@term, @timeSpan.start, @timeSpan.end, 
+        $.proxy(@setRelatedNouns, this), 15, @getEntityType())
   
   drawGraph: (code, results, duration) ->
     $('#js_sparkline_roller').hide()
@@ -83,6 +85,13 @@ Viz2 =
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))
         onDragend: (dateSpan) => @loadRelatedData()
       )
+  
+  getEntityType: ->
+    @filteringEntity = $('input[name=js_filter_entities]:checked').val()
+    options = {}
+    if @filteringEntity != 'all'
+      options.type = @filteringEntity
+    return options
     
   setRelatedAdjectives: (code, results, duration) ->
     $('#js_related_adj_roller').hide()
@@ -109,6 +118,7 @@ Viz2 =
     for value, i in values
       count = counts[i]
       currentUl = $(ul + '2') if i > 4
+      currentUl = $(ul + '3') if i > 9
       new SimilarityResult(currentUl, value, count, [],
         onClick: (result) =>
           @setTerm(result.term)

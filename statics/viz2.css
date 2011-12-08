@@ -64,6 +64,12 @@ li{
   border-color: #ccc;
   box-shadow: rgba(0,0,0,0.4) 1px 1px;
 }
+.right_side{
+  float: right;
+}
+.right_filters{
+  width:250px;
+}
 .attribute_list{
   width:200px;
   min-height:20px;
@@ -109,6 +115,9 @@ li{
 }
 .cleared{
   clear:both;
+}
+.cleared_left{
+  clear:left;
 }
 path {
     stroke: green;

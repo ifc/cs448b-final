@@ -2,24 +2,25 @@
 var DatabaseInterface = {
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults, useAnd){
+	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults, options){
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
 			return Query.DocLemmaTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
 		}, this))
-		if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
-		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults, "JJ");
+		//if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
+		options = $.extend({posPrefix: "JJ"}, options || {})
+		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults, options);
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults, useAnd){
+	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults, options){
 		terms = terms || []
 		var rawSeries = this._getSeries(terms);
 		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
 			return Query.DocEntityTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate)));
 		}, this))
-		if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
-		this._querySimilar(Query.QUERY_ENTITIES, wrappedSeries, startDate, endDate, callback, maxResults);
+		//if (useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
+		this._querySimilar(Query.QUERY_ENTITIES, wrappedSeries, startDate, endDate, callback, maxResults, options);
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
@@ -36,16 +37,18 @@ var DatabaseInterface = {
 		
 	//private
 	
-	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, posPrefix){
+	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, options){
 		maxResults = maxResults || 10
+		options = options || {}
 		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = {
 			includeText_:true,
       threshold_:undefined,
       maxResults_:maxResults,
 		}
-		if (series.length > 0) queryParams['series_'] = series
-		if (posPrefix) queryParams['posPrefix_'] = posPrefix;
+		if (series.length > 0) queryParams['series_'] = series;
+		if (options.posPrefix) queryParams['posPrefix_'] = options.posPrefix;
+		if (options.type) queryParams['type_'] = options.type;
 		Query.arbitraryQuery(url, queryParams, callback);
 	},
 	
