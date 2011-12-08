@@ -128,10 +128,12 @@
     },
     setRelatedAdjectives: function(code, results, duration) {
       $('#js_related_adj_roller').hide();
+      $('.js_adj_list').empty();
       return this.setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_']);
     },
     setRelatedNouns: function(code, results, duration) {
       $('#js_related_nouns_roller').hide();
+      $('.js_nouns_list').empty();
       return this.setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_']);
     },
     addTerm: function(term) {

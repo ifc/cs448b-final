@@ -86,10 +86,12 @@ Viz2 =
     
   setRelatedAdjectives: (code, results, duration) ->
     $('#js_related_adj_roller').hide()
+    $('.js_adj_list').empty()
     @setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_'])
       
   setRelatedNouns: (code, results, duration) ->
     $('#js_related_nouns_roller').hide()
+    $('.js_nouns_list').empty()
     @setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_'])
     
   addTerm: (term) ->

@@ -33,7 +33,7 @@ class SparklinePlot
     @draw()
     
   draw: ->
-    @clear()
+    @clearCanvas()
     lineFn = @getLine(@options.interpolation, @options.tension, @xScale, @yScale)
     @path = @g.append("svg:path")
         .attr("d", lineFn(@data))
@@ -45,10 +45,6 @@ class SparklinePlot
     #Draw the Y axis if necessary
     @drawGraphLabels(@xScale, @yScale, @options.yOffset)   
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
-    return @path
-    
-  clear: ->
-    @vis.select('path').remove()
     
   getLine: (interpolation, tension, xfn, yfn) ->
     d3.svg.line()
@@ -57,10 +53,15 @@ class SparklinePlot
       .interpolate(interpolation)
       .tension(tension)
   
-  clearCanvas: () ->
+  clear: ->
+    @clearCanvas()
+  
+  clearCanvas: ->
     @g.selectAll("line").remove()
     @g.selectAll("text").remove()
     @g.selectAll("path").remove()
+    @g.selectAll('.xTicks').remove()
+    @g.selectAll('.yTicks').remove()
     
   drawGraphTicks: (xfn, yfn) ->
     @g.selectAll(".xTicks")

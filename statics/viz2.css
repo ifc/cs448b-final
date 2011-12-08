@@ -126,6 +126,9 @@ path {
   background: #212121;
   cursor: col-resize;
 }
+.slidable{
+  cursor: move;
+}
 
 /*********** UI STUFF ******************/
 

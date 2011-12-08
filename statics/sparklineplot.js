@@ -38,18 +38,14 @@
     };
     SparklinePlot.prototype.draw = function() {
       var lineFn;
-      this.clear();
+      this.clearCanvas();
       lineFn = this.getLine(this.options.interpolation, this.options.tension, this.xScale, this.yScale);
       this.path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
       this.drawGraphAxis(this.xScale, this.yScale, this.ymax, this.xmax);
       this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
       if (this.options.drawTicks) {
-        this.drawGraphTicks(this.xScale, this.yScale);
+        return this.drawGraphTicks(this.xScale, this.yScale);
       }
-      return this.path;
-    };
-    SparklinePlot.prototype.clear = function() {
-      return this.vis.select('path').remove();
     };
     SparklinePlot.prototype.getLine = function(interpolation, tension, xfn, yfn) {
       return d3.svg.line().x(function(d, i) {
@@ -58,10 +54,15 @@
         return -1 * yfn(d);
       }).interpolate(interpolation).tension(tension);
     };
+    SparklinePlot.prototype.clear = function() {
+      return this.clearCanvas();
+    };
     SparklinePlot.prototype.clearCanvas = function() {
       this.g.selectAll("line").remove();
       this.g.selectAll("text").remove();
-      return this.g.selectAll("path").remove();
+      this.g.selectAll("path").remove();
+      this.g.selectAll('.xTicks').remove();
+      return this.g.selectAll('.yTicks').remove();
     };
     SparklinePlot.prototype.drawGraphTicks = function(xfn, yfn) {
       this.g.selectAll(".xTicks").data(xfn.ticks(5)).enter().append("svg:line").attr("class", "xTicks").attr("x1", function(d) {

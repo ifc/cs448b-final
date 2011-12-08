@@ -26,21 +26,44 @@ class EnhancedSparkline extends SparklinePlot
       @rightHandle = $('<div />', {class: 'handle'}).appendTo(@rangeSelector).css($.extend({right: '-5px'}, handleCss))
       @leftHandle.mousedown (evt) => @startDrag(evt, @leftHandle)
       @rightHandle.mousedown (evt) => @startDrag(evt, @rightHandle)
+      @rangeSelector.mousedown (evt) => @startSlide(evt)
           
-      $('body').mouseup => 
-        if @draggingHandle
+      $('body').mouseup =>
+        if @draggingHandle or @sliding
           @draggingHandle = false
+          @sliding = false
           @options.onDragend(@getDateRange)
       $('body').mousemove (evt) => 
         if @draggingHandle
           @updateDragging(evt.pageX)
-          evt.preventDefault() 
+          evt.preventDefault()
+        else if @sliding
+          @updateSliding(evt.pageX) 
+          evt.preventDefault()
   
   startDrag: (evt, handle) ->
     evt.preventDefault()
     @draggingHandle = handle
     @dragStartProperties = {offsetLeft: @selectorOffsetLeft, width: @selectorWidth}
     @dragStartPos = evt.pageX
+    
+  startSlide: (evt) ->
+    evt.preventDefault()
+    if @options.width > @selectorWidth
+      @sliding = true
+      @slideStartPos = evt.pageX
+      @slideStartOffset = @selectorOffsetLeft
+    
+  updateSliding: (x) ->
+    maxLeftOffset = @options.width - @selectorWidth
+    if maxLeftOffset > 0
+      delta = x - @slideStartPos
+      newOffset = @slideStartOffset + delta
+      newOffset = 0 if newOffset < 0
+      newOffset = maxLeftOffset if newOffset > maxLeftOffset
+      @rangeSelector.css(left: newOffset + 'px')
+      @selectorOffsetLeft = newOffset
+      @options.onRescale(@getDateRange())
   
   updateDragging: (x) ->
     offsetLeft = @dragStartProperties.offsetLeft
@@ -58,6 +81,10 @@ class EnhancedSparkline extends SparklinePlot
     @selectorOffsetLeft = newOffset
     @selectorWidth = newWidth
     @rangeSelector.css({left: newOffset + 'px', width: newWidth + 'px'})
+    if @selectorWidth < @options.width
+      @rangeSelector.addClass('slidable')
+    else
+      @rangeSelector.removeClass('slidable')
     @options.onRescale(@getDateRange())
         
   getDateRange: ->
