@@ -14,6 +14,7 @@ class SparklinePlot
     yOffset: 0
   
   constructor: (container, data, options = {}) ->
+    @container = $(container)
     @options = $.extend({}, @defaultOptions, options)
     @vis = d3.select(container)
         .append("svg:svg")

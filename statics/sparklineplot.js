@@ -19,6 +19,7 @@
       if (options == null) {
         options = {};
       }
+      this.container = $(container);
       this.options = $.extend({}, this.defaultOptions, options);
       this.vis = d3.select(container).append("svg:svg").attr("width", this.options.width).attr("height", this.options.height);
       this.g = this.vis.append("svg:g").attr("transform", "translate(0, " + this.options.height + ")");

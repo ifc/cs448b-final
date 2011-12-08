@@ -3,7 +3,7 @@ class SimilarityResult
   defaultOptions:
     startDate: null
     endDate: null
-    onClick: () -> null
+    onDragend: () -> null
     graphWidth: 190
     graphHeight: 20
   
@@ -63,17 +63,26 @@ Viz2 =
     @term = null if @term == ""
     #@terms.push(@term)
     @mainSparkline.clear() if @mainSparkline
-    $('.js_attr_list').empty()
     DatabaseInterface.queryOverPeriod(@term, null, null, $.proxy(@drawGraph, this))
-    DatabaseInterface.similarEntitiesOverPeriod(@term, null, null, $.proxy(@setRelatedNouns, this), 10)
-    DatabaseInterface.similarAdjectivesOverPeriod(@term, null, null, $.proxy(@setRelatedAdjectives, this), 10)
+    @loadRelatedData()
+    
+  loadRelatedData: ->
+    $('.js_attr_list').empty()
+    @timeSpan = if @mainSparkline then @mainSparkline.getDateRange() else {}
+    DatabaseInterface.similarEntitiesOverPeriod(@term, @timeSpan.start, @timeSpan.end, $.proxy(@setRelatedNouns, this), 10)
+    DatabaseInterface.similarAdjectivesOverPeriod(@term, @timeSpan.start, @timeSpan.end, $.proxy(@setRelatedAdjectives, this), 10)
   
   drawGraph: (code, results, duration) ->
     $('#js_sparkline_roller').hide()
     if @mainSparkline
       @mainSparkline.setData(results[0]) 
     else
-      @mainSparkline = new SparklinePlot('#js_main_viz', results[0])
+      @mainSparkline = new EnhancedSparkline('#js_main_viz', results[0],
+        onRescale: (dateSpan) =>
+          $('#js_date_start').html(DateFormatter.format(dateSpan.start))
+          $('#js_date_end').html(DateFormatter.format(dateSpan.end))
+        onDragend: (dateSpan) => @loadRelatedData()
+      )
     
   setRelatedAdjectives: (code, results, duration) ->
     $('#js_related_adj_roller').hide()
@@ -103,7 +112,24 @@ Viz2 =
           @setTerm(result.term)
           #@addTerm(result.term)
       )
-      
+
+DateFormatter =
+  months:
+    0: 'January'
+    1: 'February'
+    2: 'March'
+    3: 'April'
+    4: 'May'
+    5: 'June'
+    6: 'July'
+    7: 'August'
+    8: 'September'
+    9: 'October'
+    10: 'November'
+    11: 'December'
+  format: (date) ->
+    month = @months[date.getMonth()]
+    return month + ' ' + date.getFullYear()
 
 window.Viz2 = Viz2
     

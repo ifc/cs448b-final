@@ -1,11 +1,11 @@
 (function() {
-  var ExtraTerm, SimilarityResult, Viz2;
+  var DateFormatter, ExtraTerm, SimilarityResult, Viz2;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   SimilarityResult = (function() {
     SimilarityResult.prototype.defaultOptions = {
       startDate: null,
       endDate: null,
-      onClick: function() {
+      onDragend: function() {
         return null;
       },
       graphWidth: 190,
@@ -101,17 +101,29 @@
       if (this.mainSparkline) {
         this.mainSparkline.clear();
       }
-      $('.js_attr_list').empty();
       DatabaseInterface.queryOverPeriod(this.term, null, null, $.proxy(this.drawGraph, this));
-      DatabaseInterface.similarEntitiesOverPeriod(this.term, null, null, $.proxy(this.setRelatedNouns, this), 10);
-      return DatabaseInterface.similarAdjectivesOverPeriod(this.term, null, null, $.proxy(this.setRelatedAdjectives, this), 10);
+      return this.loadRelatedData();
+    },
+    loadRelatedData: function() {
+      $('.js_attr_list').empty();
+      this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
+      DatabaseInterface.similarEntitiesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedNouns, this), 10);
+      return DatabaseInterface.similarAdjectivesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedAdjectives, this), 10);
     },
     drawGraph: function(code, results, duration) {
       $('#js_sparkline_roller').hide();
       if (this.mainSparkline) {
         return this.mainSparkline.setData(results[0]);
       } else {
-        return this.mainSparkline = new SparklinePlot('#js_main_viz', results[0]);
+        return this.mainSparkline = new EnhancedSparkline('#js_main_viz', results[0], {
+          onRescale: __bind(function(dateSpan) {
+            $('#js_date_start').html(DateFormatter.format(dateSpan.start));
+            return $('#js_date_end').html(DateFormatter.format(dateSpan.end));
+          }, this),
+          onDragend: __bind(function(dateSpan) {
+            return this.loadRelatedData();
+          }, this)
+        });
       }
     },
     setRelatedAdjectives: function(code, results, duration) {
@@ -150,6 +162,27 @@
         }));
       }
       return _results;
+    }
+  };
+  DateFormatter = {
+    months: {
+      0: 'January',
+      1: 'February',
+      2: 'March',
+      3: 'April',
+      4: 'May',
+      5: 'June',
+      6: 'July',
+      7: 'August',
+      8: 'September',
+      9: 'October',
+      10: 'November',
+      11: 'December'
+    },
+    format: function(date) {
+      var month;
+      month = this.months[date.getMonth()];
+      return month + ' ' + date.getFullYear();
     }
   };
   window.Viz2 = Viz2;

@@ -1,7 +1,7 @@
 body {
   font: 13px Helvetica Neue;
   text-rendering: optimizeLegibility;
-  margin-top: 1em;
+  margin:0;
   overflow-y: scroll;
   text-align:center;
 }
@@ -26,6 +26,12 @@ li{
   position: relative;
   left: -50px;
   display: block;
+}
+.date_span_text{
+  text-align: center;
+}
+.date_span_text span{
+  font-weight:bold;
 }
 
 .extra_terms {
@@ -58,7 +64,6 @@ li{
   border-color: #ccc;
   box-shadow: rgba(0,0,0,0.4) 1px 1px;
 }
-
 .attribute_list{
   width:200px;
   min-height:20px;
@@ -109,6 +114,17 @@ path {
     stroke: green;
     stroke-width: 2;
     fill: none;
+}
+
+.range_selector{
+  opacity:0.4;
+  filter:alpha(opacity=40); /* For IE8 and earlier */
+  background:#82c0fd;
+}
+.range_selector .handle{
+  border:1px solid black;
+  background: #212121;
+  cursor: col-resize;
 }
 
 /*********** UI STUFF ******************/
