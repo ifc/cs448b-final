@@ -13,7 +13,9 @@
       width: 958,
       height: 100,
       xOffset: 0,
-      yOffset: 0
+      yOffset: 0,
+      startDate: new Date(2000, 0),
+      endDate: new Date(2010, 11)
     };
     function SparklinePlot(container, data, options) {
       if (options == null) {
@@ -91,6 +93,15 @@
     SparklinePlot.prototype.drawGraphAxis = function(xfn, yfn, maxX, maxY) {
       this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(maxX)).attr("y2", -1 * yfn(0));
       return this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(0)).attr("y2", -1 * yfn(maxY)).attr("y2", -1 * yfn(maxY));
+    };
+    SparklinePlot.prototype.dateToNumber = function(dateObj) {
+      return dateObj.getFullYear() + dateObj.getMonth() / 12;
+    };
+    SparklinePlot.prototype.numberToDate = function(number) {
+      var month, year;
+      month = Math.round((number % 1) * 12);
+      year = Math.floor(number);
+      return new Date(year, month);
     };
     return SparklinePlot;
   })();

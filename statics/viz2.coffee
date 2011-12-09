@@ -28,13 +28,17 @@ class SimilarityResult
     DatabaseInterface.queryOverPeriod(@otherTerms, null, null, $.proxy(@drawGraph, this))
     
   drawGraph: (code, results, duration) ->
-    @mainSparkline = new SparklinePlot(@graphContainer[0], results[0] ,
+    @sparkline = new HighlightableSparkline(@graphContainer[0], results[0] ,
       height: @options.graphHeight
       width: @options.graphWidth
       drawTicks: false
       drawYLabels: false
     )
-    
+    @sparkline.highlight(@hlSpan) if @hlSpan
+
+  highlight: (@hlSpan) -> 
+    @sparkline.highlight(@hlSpan) if @sparkline 
+  
 class ExtraTerm
   constructor: (@term, @onRemoveCallback) ->
     @draw()
@@ -69,8 +73,8 @@ Viz2 =
     
   loadRelatedData: ->
     $('.js_attr_list').empty()
-    @timeSpan = if @mainSparkline then @mainSparkline.getDateRange() else {}
-    
+    $('#js_related_nouns_roller').show()
+    @loadTimeSpan()
     DatabaseInterface.similarEntitiesOverPeriod(@term, @timeSpan.start, @timeSpan.end, 
         $.proxy(@setRelatedNouns, this), 15, @getEntityType())
   
@@ -85,19 +89,17 @@ Viz2 =
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))
         onDragend: (dateSpan) => @loadRelatedData()
       )
-  
+      
+  loadTimeSpan: ->
+    @timeSpan = if @mainSparkline then @mainSparkline.getDateRange() else {}
+      
   getEntityType: ->
     @filteringEntity = $('input[name=js_filter_entities]:checked').val()
     options = {}
     if @filteringEntity != 'all'
       options.type = @filteringEntity
     return options
-    
-  setRelatedAdjectives: (code, results, duration) ->
-    $('#js_related_adj_roller').hide()
-    $('.js_adj_list').empty()
-    @setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_'])
-      
+
   setRelatedNouns: (code, results, duration) ->
     $('#js_related_nouns_roller').hide()
     $('.js_nouns_list').empty()
@@ -119,11 +121,12 @@ Viz2 =
       count = counts[i]
       currentUl = $(ul + '2') if i > 4
       currentUl = $(ul + '3') if i > 9
-      new SimilarityResult(currentUl, value, count, [],
+      sparkline = new SimilarityResult(currentUl, value, count, [],
         onClick: (result) =>
           @setTerm(result.term)
           #@addTerm(result.term)
       )
+      sparkline.highlight(@timeSpan)
 
 DateFormatter =
   months:

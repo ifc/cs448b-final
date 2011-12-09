@@ -49,12 +49,21 @@
       return DatabaseInterface.queryOverPeriod(this.otherTerms, null, null, $.proxy(this.drawGraph, this));
     };
     SimilarityResult.prototype.drawGraph = function(code, results, duration) {
-      return this.mainSparkline = new SparklinePlot(this.graphContainer[0], results[0], {
+      this.sparkline = new HighlightableSparkline(this.graphContainer[0], results[0], {
         height: this.options.graphHeight,
         width: this.options.graphWidth,
         drawTicks: false,
         drawYLabels: false
       });
+      if (this.hlSpan) {
+        return this.sparkline.highlight(this.hlSpan);
+      }
+    };
+    SimilarityResult.prototype.highlight = function(hlSpan) {
+      this.hlSpan = hlSpan;
+      if (this.sparkline) {
+        return this.sparkline.highlight(this.hlSpan);
+      }
     };
     return SimilarityResult;
   })();
@@ -111,7 +120,8 @@
     },
     loadRelatedData: function() {
       $('.js_attr_list').empty();
-      this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
+      $('#js_related_nouns_roller').show();
+      this.loadTimeSpan();
       return DatabaseInterface.similarEntitiesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedNouns, this), 15, this.getEntityType());
     },
     drawGraph: function(code, results, duration) {
@@ -130,6 +140,9 @@
         });
       }
     },
+    loadTimeSpan: function() {
+      return this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
+    },
     getEntityType: function() {
       var options;
       this.filteringEntity = $('input[name=js_filter_entities]:checked').val();
@@ -138,11 +151,6 @@
         options.type = this.filteringEntity;
       }
       return options;
-    },
-    setRelatedAdjectives: function(code, results, duration) {
-      $('#js_related_adj_roller').hide();
-      $('.js_adj_list').empty();
-      return this.setListValues('#js_related_adj', results[0]['lemma_'], results[0]['count_']);
     },
     setRelatedNouns: function(code, results, duration) {
       $('#js_related_nouns_roller').hide();
@@ -161,7 +169,7 @@
       return this.loadData();
     },
     setListValues: function(ul, values, counts) {
-      var count, currentUl, i, value, _len, _results;
+      var count, currentUl, i, sparkline, value, _len, _results;
       currentUl = $(ul);
       _results = [];
       for (i = 0, _len = values.length; i < _len; i++) {
@@ -173,11 +181,12 @@
         if (i > 9) {
           currentUl = $(ul + '3');
         }
-        _results.push(new SimilarityResult(currentUl, value, count, [], {
+        sparkline = new SimilarityResult(currentUl, value, count, [], {
           onClick: __bind(function(result) {
             return this.setTerm(result.term);
           }, this)
-        }));
+        });
+        _results.push(sparkline.highlight(this.timeSpan));
       }
       return _results;
     }

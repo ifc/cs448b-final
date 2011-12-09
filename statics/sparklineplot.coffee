@@ -12,6 +12,8 @@ class SparklinePlot
     height: 100
     xOffset: 0
     yOffset: 0
+    startDate: new Date(2000,0)
+    endDate: new Date(2010, 11)
   
   constructor: (container, data, options = {}) ->
     @container = $(container)
@@ -118,5 +120,14 @@ class SparklinePlot
         .attr("x2", xfn(0))
         .attr("y2", -1 * yfn(maxY))
         .attr("y2", -1 * yfn(maxY))
+        
+      
+  dateToNumber: (dateObj) ->
+    return dateObj.getFullYear() + dateObj.getMonth() / 12
+    
+  numberToDate: (number) ->
+    month = Math.round((number % 1) * 12)
+    year = Math.floor(number)
+    return new Date(year, month)
         
 window.SparklinePlot = SparklinePlot

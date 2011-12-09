@@ -2,8 +2,6 @@ class EnhancedSparkline extends SparklinePlot
   extraOptions:
     onDragend: -> null
     onRescale: -> null
-    startDate: new Date(2000,0)
-    endDate: new Date(2010, 11)
     
   constructor: (container, data, options = {}) ->
     super(container, data, options)
@@ -97,12 +95,5 @@ class EnhancedSparkline extends SparklinePlot
     dateRangeStart = @numberToDate(dateRangeStartNumber)
     dateRangeEnd = @numberToDate(dateRangeStartNumber + dateRangeSpanNumber)
     return {start: dateRangeStart, end: dateRangeEnd}
-    
-  dateToNumber: (dateObj) ->
-    return dateObj.getFullYear() + dateObj.getMonth() / 12
-  numberToDate: (number) ->
-    month = Math.round((number % 1) * 12)
-    year = Math.floor(number)
-    return new Date(year, month)
   
 window.EnhancedSparkline = EnhancedSparkline
