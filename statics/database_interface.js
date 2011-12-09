@@ -27,11 +27,9 @@ var DatabaseInterface = {
 	queryOverPeriod: function(terms, startDate, endDate, callback, useAnd){
 		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = { buckets_: buckets }
-		if (terms) {
-			var series = this._getSeries(terms)
-			if (useAnd && series.length > 1) series = Query.AndTerm.apply(this, series);
-			queryParams['series_'] = series
-		}
+		var series = this._getSeries(terms)
+		if (useAnd && series.length > 1) series = Query.AndTerm.apply(this, series);
+		queryParams['series_'] = series
 		Query.arbitraryQuery(Query.BUCKET_DOCS, queryParams, callback);
 	},
 		
@@ -59,9 +57,13 @@ var DatabaseInterface = {
 	},
 	
 	_getSeries: function(terms){
-		return $.map(this._toArray(terms), $.proxy(function(term){ 
-			return Query.OrTerm(Query.EntityTerm(term), Query.LemmaTerm(term))
-		}, this));
+		if (terms && terms.length > 0){
+			return $.map(this._toArray(terms), $.proxy(function(term){ 
+				return Query.OrTerm(Query.EntityTerm(term), Query.LemmaTerm(term));
+			}, this));
+		} else {
+			return [Query.AllDocsTerm()];
+		}
 	},
 		
 	_toArray: function(obj){
@@ -126,7 +128,9 @@ var Query = {
 	success: function(code){
 	    return code >= 200 && code <= 300;
 	},
-	
+	AllDocsTerm: function() {
+    return {allDocs_:{}};
+	},
 	LemmaTerm: function(word) {
 	    return {lemma_:{lemma_:word}};
 	},
