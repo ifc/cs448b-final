@@ -61,6 +61,7 @@ Viz2 =
       @loadData() if event.keyCode == 13
     @loadData()
     $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
+    $('#js_filter_newspapers').change => @loadData()
     
   loadData: ->
     $('.js_roller').show()
@@ -68,15 +69,26 @@ Viz2 =
     @term = null if @term == ""
     #@terms.push(@term)
     @mainSparkline.clear() if @mainSparkline
-    DatabaseInterface.queryOverPeriod(@term, null, null, $.proxy(@drawGraph, this))
+    DatabaseInterface.query(
+      terms: @term
+      callback: $.proxy(@drawGraph, this)
+      pubid: @getPubid()
+    )
     @loadRelatedData()
     
   loadRelatedData: ->
     $('.js_attr_list').empty()
     $('#js_related_nouns_roller').show()
     @loadTimeSpan()
-    DatabaseInterface.similarEntitiesOverPeriod(@term, @timeSpan.start, @timeSpan.end, 
-        $.proxy(@setRelatedNouns, this), 15, @getEntityType())
+    DatabaseInterface.similarEntities(
+      terms: @term
+      startDate: @timeSpan.start
+      endDate: @timeSpan.end
+      callback: $.proxy(@setRelatedNouns, this)
+      maxResults: 15
+      pubid: @getPubid()
+      type: @getEntityType()
+    )
   
   drawGraph: (code, results, duration) ->
     $('#js_sparkline_roller').hide()
@@ -95,10 +107,11 @@ Viz2 =
       
   getEntityType: ->
     @filteringEntity = $('input[name=js_filter_entities]:checked').val()
-    options = {}
-    if @filteringEntity != 'all'
-      options.type = @filteringEntity
-    return options
+    return if @filteringEntity == 'all' then null else @filteringEntity
+    
+  getPubid: ->
+    @pubid = $('input[name=js_filter_newspapers]:checked').val()
+    return if @pubid == 'all' then null else @pubid
 
   setRelatedNouns: (code, results, duration) ->
     $('#js_related_nouns_roller').hide()

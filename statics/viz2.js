@@ -100,10 +100,13 @@
         }
       }, this));
       this.loadData();
-      return $('#js_filter_entities').change(__bind(function() {
+      $('#js_filter_entities').change(__bind(function() {
         if (this.mainSparkline) {
           return this.loadRelatedData();
         }
+      }, this));
+      return $('#js_filter_newspapers').change(__bind(function() {
+        return this.loadData();
       }, this));
     },
     loadData: function() {
@@ -115,14 +118,26 @@
       if (this.mainSparkline) {
         this.mainSparkline.clear();
       }
-      DatabaseInterface.queryOverPeriod(this.term, null, null, $.proxy(this.drawGraph, this));
+      DatabaseInterface.query({
+        terms: this.term,
+        callback: $.proxy(this.drawGraph, this),
+        pubid: this.getPubid()
+      });
       return this.loadRelatedData();
     },
     loadRelatedData: function() {
       $('.js_attr_list').empty();
       $('#js_related_nouns_roller').show();
       this.loadTimeSpan();
-      return DatabaseInterface.similarEntitiesOverPeriod(this.term, this.timeSpan.start, this.timeSpan.end, $.proxy(this.setRelatedNouns, this), 15, this.getEntityType());
+      return DatabaseInterface.similarEntities({
+        terms: this.term,
+        startDate: this.timeSpan.start,
+        endDate: this.timeSpan.end,
+        callback: $.proxy(this.setRelatedNouns, this),
+        maxResults: 15,
+        pubid: this.getPubid(),
+        type: this.getEntityType()
+      });
     },
     drawGraph: function(code, results, duration) {
       $('#js_sparkline_roller').hide();
@@ -144,13 +159,20 @@
       return this.timeSpan = this.mainSparkline ? this.mainSparkline.getDateRange() : {};
     },
     getEntityType: function() {
-      var options;
       this.filteringEntity = $('input[name=js_filter_entities]:checked').val();
-      options = {};
-      if (this.filteringEntity !== 'all') {
-        options.type = this.filteringEntity;
+      if (this.filteringEntity === 'all') {
+        return null;
+      } else {
+        return this.filteringEntity;
       }
-      return options;
+    },
+    getPubid: function() {
+      this.pubid = $('input[name=js_filter_newspapers]:checked').val();
+      if (this.pubid === 'all') {
+        return null;
+      } else {
+        return this.pubid;
+      }
     },
     setRelatedNouns: function(code, results, duration) {
       $('#js_related_nouns_roller').hide();

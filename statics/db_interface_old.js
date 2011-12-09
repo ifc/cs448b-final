@@ -1,75 +1,50 @@
 //Use this to query the backend and get back results
-var DatabaseInterface = {
+var OldDatabaseInterface = {
 	
-	similarEntities: function(options){
-		var series = this._getSeries(options.terms);
-		this._querySimilar(Query.QUERY_ENTITIES, series, options.callback, Query.DocEntityTerm, options);
+	//callbacks of the form: function(responseCode, results, duration)
+	similarAdjectivesOverPeriod: function(terms, startDate, endDate, callback, maxResults, options){
+		var rawSeries = this._getSeries(terms);
+		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
+			return Query.DocLemmaTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate))) 
+		}, this))
+		if (options.useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
+		options = $.extend({posPrefix: "JJ"}, options || {})
+		this._querySimilar(Query.QUERY_LEMMAS, wrappedSeries, startDate, endDate, callback, maxResults, options);
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	similarAdjectives: function(options){
-		var series = this._getSeries(options.terms);
-		options = $.extend({posPrefix: "JJ"}, options);
-		this._querySimilar(Query.QUERY_LEMMAS, series, options.callback, Query.DocLemmaTerm, options);
-	},
-	
-	//callbacks of the form: function(responseCode, results, duration)
-	//this method is deprecated. use similarEntities(options) instead
 	similarEntitiesOverPeriod: function(terms, startDate, endDate, callback, maxResults, options){
-		this.similarEntities($.extend({
-			term: terms,
-			startDate: startDate,
-			endDate: endDate,
-			callback: callback,
-			maxResults: maxResults,
-		}, options || {}))
-	},
-	
-	query: function(options){
-		var buckets = this._getMonthBuckets(options.startDate, options.endDate);
-		var queryParams = { buckets_: buckets }
-		var series = this._getSeries(options.terms)
-		if (options.useAnd && series.length > 1) {
-			series = [Query.AndTerm.apply(Query, series)];
-		}
-		queryParams['series_'] = series
-		if (options.pubid) queryParams['filter_'] = Query.PublicationTerm(options.pubid);
-		Query.arbitraryQuery(Query.BUCKET_DOCS, queryParams, options.callback);
+		terms = terms || []
+		var rawSeries = this._getSeries(terms);
+		var wrappedSeries = $.map(rawSeries, $.proxy(function(term){ 
+			return Query.DocEntityTerm( Query.AndTerm(term, this._getDateSpanTerm(startDate, endDate)));
+		}, this))
+		if (options.useAnd && wrappedSeries.length > 1) wrappedSeries = Query.AndTerm.apply(this, wrappedSeries);
+		this._querySimilar(Query.QUERY_ENTITIES, wrappedSeries, startDate, endDate, callback, maxResults, options);
 	},
 	
 	//callbacks of the form: function(responseCode, results, duration)
-	//this method is deprecated. use query(options) instead
 	queryOverPeriod: function(terms, startDate, endDate, callback, useAnd){
-		this.query({
-			terms: terms,
-			startDate: startDate,
-			endDate: endDate,
-			callback: callback,
-			useAnd: useAnd
-		});
+		var buckets = this._getMonthBuckets(startDate, endDate);
+		var queryParams = { buckets_: buckets }
+		var series = this._getSeries(terms)
+		if (useAnd && series.length > 1) series = Query.AndTerm.apply(this, series);
+		queryParams['series_'] = series
+		Query.arbitraryQuery(Query.BUCKET_DOCS, queryParams, callback);
 	},
 		
 	//private
 	
-	_querySimilar: function(url, series, callback, termFunction, options){
+	_querySimilar: function(url, series, startDate, endDate, callback, maxResults, options){
+		maxResults = maxResults || 10
 		options = options || {}
-		var maxResults = options.maxResults || 10
-		var dateSpanTerm = this._getDateSpanTerm(options.startDate, options.endDate)
-		var stuffToAnd = [dateSpanTerm];
-		if (options.pubid) stuffToAnd.push(Query.PublicationTerm(options.pubid))
-		if (options.useAnd){
-			series = [termFunction(Query.AndTerm.apply(Query, stuffToAnd.concat(series)))];
-		} else {
-			series = $.map(series, function(term){
-				return termFunction(Query.AndTerm.apply(Query, stuffToAnd.concat([term])));
-		 });
-		}
+		var buckets = this._getMonthBuckets(startDate, endDate);
 		var queryParams = {
-			series_: series,
 			includeText_:true,
       threshold_:undefined,
       maxResults_:maxResults,
 		}
+		queryParams['series_'] = series;
 		if (options.posPrefix) queryParams['posPrefix_'] = options.posPrefix;
 		if (options.type) queryParams['type_'] = options.type;
 		Query.arbitraryQuery(url, queryParams, callback);
@@ -196,7 +171,7 @@ var Query = {
 	    return {section_:{name_:name}};
 	},
 	PublicationTerm: function(id) {
-	    return {publication_:{publication_:id}};
+	    return {publication_:{id_:id}};
 	},
 	DocLemmaTerm: function(expr) {
 	    return {docLemma_:{term_:expr}};
