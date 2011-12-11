@@ -206,4 +206,5 @@ div.overlay {
   stroke: #ddd;
   stroke-width: 1;
   fill: none; 
+  stroke-dasharray: 5 5;
 }

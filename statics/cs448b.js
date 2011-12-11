@@ -325,7 +325,7 @@ function drawRelatedData() {
       g.append("svg:text")
           .text(similarTerms[i])
           .attr("class", "barbar")
-          .attr("y", yOffset-h)
+          .attr("y", -1*yOffset+14)
           .attr("x", xOffset)
     }
   }, 16);
