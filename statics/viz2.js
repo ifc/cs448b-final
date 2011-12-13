@@ -108,6 +108,7 @@
           return this.loadData();
         }
       }, this));
+      this.loadStateFromHash();
       this.loadData();
       $('#js_filter_entities').change(__bind(function() {
         if (this.mainSparkline) {
@@ -155,6 +156,7 @@
       $('.js_attr_list').empty();
       $('#js_related_nouns_roller').show();
       this.loadTimeSpan();
+      this.pushStateToHash();
       return DatabaseInterface.similarEntities({
         terms: this.getSearchTerms(),
         useAnd: true,
@@ -205,6 +207,10 @@
         return this.filteringEntity;
       }
     },
+    setEntityType: function(type) {
+      type || (type = 'all');
+      return $("input[name=js_filter_entities][value=" + type + "]")[0].checked = true;
+    },
     getPubid: function() {
       this.pubid = $('input[name=js_filter_newspapers]:checked').val();
       if (this.pubid === 'all') {
@@ -212,6 +218,10 @@
       } else {
         return this.pubid;
       }
+    },
+    setPubid: function(value) {
+      value || (value = 'all');
+      return $("input[name=js_filter_newspapers][value=" + value + "]")[0].checked = true;
     },
     setRelatedNouns: function(code, results, duration) {
       $('#js_related_nouns_roller').hide();
@@ -229,8 +239,9 @@
       }
     },
     setTerm: function(term) {
-      this.search.val(term);
-      return $('#js_current_term').text(term || 'All Articles');
+      this.term = term;
+      this.search.val(this.term);
+      return $('#js_current_term').text(this.term || 'All Articles');
     },
     setListValues: function(ul, values, counts) {
       var count, currentUl, i, sparkline, value, _len, _results;
@@ -258,6 +269,45 @@
         _results.push(sparkline.highlight(this.timeSpan));
       }
       return _results;
+    },
+    getState: function() {
+      var state;
+      state = {};
+      if (this.term) {
+        state.term = this.term;
+      }
+      if (this.getPubid()) {
+        state.pubid = this.getPubid();
+      }
+      if (this.getEntityType()) {
+        state.entityType = this.getEntityType();
+      }
+      if (this.timeSpan.start) {
+        state.start = this.timeSpan.start.toDateString();
+      }
+      if (this.timeSpan.end) {
+        state.end = this.timeSpan.end.toDateString();
+      }
+      return state;
+    },
+    pushStateToHash: function() {
+      return window.location.hash = encodeURIComponent(JSON.stringify(this.getState()));
+    },
+    loadStateFromHash: function() {
+      var state;
+      if (window.location.hash !== "") {
+        state = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
+        this.setTerm(state.term);
+        this.setPubid(state.pubid);
+        this.setEntityType(state.entityType);
+        this.timeSpan = {};
+        if (state.start) {
+          this.timeSpan.start = new Date(state.start);
+        }
+        if (state.end) {
+          return this.timeSpan.end = new Date(state.end);
+        }
+      }
     }
   };
   window.Viz2 = Viz2;

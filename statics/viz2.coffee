@@ -68,6 +68,7 @@ Viz2 =
     @search = $('#js_search_box')
     @search.keyup (event) =>
       @loadData() if event.keyCode == 13
+    @loadStateFromHash()
     @loadData()
     $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
     $('#js_filter_newspapers').change => @loadData()
@@ -106,6 +107,7 @@ Viz2 =
     $('.js_attr_list').empty()
     $('#js_related_nouns_roller').show()
     @loadTimeSpan()
+    @pushStateToHash()
     DatabaseInterface.similarEntities(
       terms: @getSearchTerms()
       useAnd: true
@@ -145,11 +147,18 @@ Viz2 =
   getEntityType: ->
     @filteringEntity = $('input[name=js_filter_entities]:checked').val()
     return if @filteringEntity == 'all' then null else @filteringEntity
+  setEntityType: (type) ->  
+    type or= 'all'
+    $("input[name=js_filter_entities][value=#{type}]")[0].checked = true
     
   getPubid: ->
     @pubid = $('input[name=js_filter_newspapers]:checked').val()
     return if @pubid == 'all' then null else @pubid
-
+  setPubid: (value)->
+    value or= 'all'
+    $("input[name=js_filter_newspapers][value=#{value}]")[0].checked = true
+  
+  
   setRelatedNouns: (code, results, duration) ->
     $('#js_related_nouns_roller').hide()
     $('.js_nouns_list').empty()
@@ -162,9 +171,9 @@ Viz2 =
         @loadData()
       @terms.push(termObj)
         
-  setTerm: (term) ->
-    @search.val(term)
-    $('#js_current_term').text(term || 'All Articles')
+  setTerm: (@term) ->
+    @search.val(@term)
+    $('#js_current_term').text(@term || 'All Articles')
     
   setListValues: (ul, values, counts) ->
     currentUl = $(ul)
@@ -181,7 +190,31 @@ Viz2 =
         pubid: @getPubid()
       )
       sparkline.highlight(@timeSpan)
-
+      
+  getState: ->
+    state = {}
+    state.term = @term if @term
+    state.pubid = @getPubid() if @getPubid()
+    state.entityType = @getEntityType() if @getEntityType()
+    state.start = @timeSpan.start.toDateString() if @timeSpan.start
+    state.end = @timeSpan.end.toDateString() if @timeSpan.end
+    return state
+      
+  pushStateToHash: ->
+    window.location.hash = encodeURIComponent(JSON.stringify(@getState()))
+          
+  loadStateFromHash: ->
+    if window.location.hash != ""
+      state = JSON.parse(decodeURIComponent(window.location.hash.slice(1)))
+      @setTerm(state.term)
+      @setPubid(state.pubid)
+      @setEntityType(state.entityType)
+      @timeSpan = {}
+      @timeSpan.start = new Date(state.start) if state.start
+      @timeSpan.end = new Date(state.end) if state.end
+    
+    
+      
 window.Viz2 = Viz2
     
 $ ->
