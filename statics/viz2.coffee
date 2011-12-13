@@ -6,6 +6,7 @@ class SimilarityResult
     onDragend: () -> null
     graphWidth: 190
     graphHeight: 20
+    pubid: false
   
   constructor: (parent, @term, @count, @otherTerms, options = {}) ->
     @parent = $(parent)
@@ -25,7 +26,12 @@ class SimilarityResult
     @graphContainer = $('<div />', {class: 'minigraph', id: id}).appendTo @elm
       
   loadSparkline: ->
-    DatabaseInterface.queryOverPeriod(@otherTerms, null, null, $.proxy(@drawGraph, this))
+    DatabaseInterface.query(
+      terms: @otherTerms.concat([@term])
+      callback: $.proxy(@drawGraph, this)
+      useAnd: true
+      pubid: @options.pubid
+    )
     
   drawGraph: (code, results, duration) ->
     @sparkline = new HighlightableSparkline(@graphContainer[0], results[0] ,
@@ -43,13 +49,16 @@ class ExtraTerm
   constructor: (@term, @onRemoveCallback) ->
     @draw()
     
+  remove: ->
+    @elm.remove()
+    @onRemoveCallback(this)
+    
   draw: ->
     @elm = $('<span />', {class: 'extra_term', text: @term}).appendTo $('#js_extra_terms')
-    closeLink = $('<a />', {text: 'X'}).appendTo @elm
+    closeLink = $('<a />', {text: 'x'}).appendTo @elm
     closeLink.click (evt) =>
       evt.preventDefault()
-      @elm.remove()
-      @onRemoveCallback(this)
+      @remove()
 
 ######################### Main Object for Viz2 #######################################
 
@@ -65,14 +74,16 @@ Viz2 =
     
   loadData: ->
     $('.js_roller').show()
-    @term = $.trim(@search.val())
-    @term = null if @term == ""
-    #@terms.push(@term)
+    term = $.trim(@search.val())
+    @search.val('')
+    term = null if @term == ""
+    @addTerm(term) if term
     @mainSparkline.clear() if @mainSparkline
     DatabaseInterface.query(
-      terms: @term
+      terms: @getSearchTerms()
       callback: $.proxy(@drawGraph, this)
       pubid: @getPubid()
+      useAnd: true
     )
     @loadRelatedData()
     
@@ -81,14 +92,18 @@ Viz2 =
     $('#js_related_nouns_roller').show()
     @loadTimeSpan()
     DatabaseInterface.similarEntities(
-      terms: @term
+      terms: @getSearchTerms()
+      useAnd: true
       startDate: @timeSpan.start
       endDate: @timeSpan.end
       callback: $.proxy(@setRelatedNouns, this)
-      maxResults: 15
+      maxResults: 20
       pubid: @getPubid()
       type: @getEntityType()
     )
+    
+  getSearchTerms: ->
+    return $.map(@terms, (termObj) -> termObj.term)
   
   drawGraph: (code, results, duration) ->
     $('#js_sparkline_roller').hide()
@@ -96,6 +111,10 @@ Viz2 =
       @mainSparkline.setData(results[0]) 
     else
       @mainSparkline = new EnhancedSparkline('#js_main_viz', results[0],
+        width: 700
+        xOffset: 20
+        marginX: 30
+        marginY: 10
         onRescale: (dateSpan) =>
           $('#js_date_start').html(DateFormatter.format(dateSpan.start))
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))
@@ -119,11 +138,12 @@ Viz2 =
     @setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_'])
     
   addTerm: (term) ->
-      new ExtraTerm term, =>
-        @terms.remove(term)
+    if @getSearchTerms().indexOf(term) == -1
+      termObj = new ExtraTerm term, (thisTermObj) =>
+        @terms.remove(thisTermObj)
         @loadData()
-      @loadData()
-  
+      @terms.push(termObj)
+        
   setTerm: (term) ->
     @search.val(term)
     @loadData()
@@ -134,10 +154,13 @@ Viz2 =
       count = counts[i]
       currentUl = $(ul + '2') if i > 4
       currentUl = $(ul + '3') if i > 9
-      sparkline = new SimilarityResult(currentUl, value, count, [],
+      currentUl = $(ul + '4') if i > 14
+      sparkline = new SimilarityResult(currentUl, value, count, @getSearchTerms(),
         onClick: (result) =>
-          @setTerm(result.term)
-          #@addTerm(result.term)
+          #@setTerm(result.term)
+          @addTerm(result.term)
+          @loadData()
+        pubid: @getPubid()
       )
       sparkline.highlight(@timeSpan)
 

@@ -73,6 +73,10 @@ li{
 
 .right_filters{
   width:180px;
+  float:right;
+}
+.main_viz_container{
+  margin-right: 200px;
 }
 .attribute_list{
   width:200px;
@@ -117,7 +121,7 @@ li{
   /*border:1px solid #777; */
 }
 .main_viz {
-  height:200px;
+  height:110px;
   /*left: 170px;*/
 }
 .cleared {
@@ -130,6 +134,10 @@ path {
     stroke: green;
     stroke-width: 2;
     fill: none;
+}
+line {
+  stroke: black;
+  stroke-width: 1;
 }
 
 .range_selector {

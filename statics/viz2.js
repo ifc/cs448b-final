@@ -9,7 +9,8 @@
         return null;
       },
       graphWidth: 190,
-      graphHeight: 20
+      graphHeight: 20,
+      pubid: false
     };
     function SimilarityResult(parent, term, count, otherTerms, options) {
       this.term = term;
@@ -46,7 +47,12 @@
       }).appendTo(this.elm);
     };
     SimilarityResult.prototype.loadSparkline = function() {
-      return DatabaseInterface.queryOverPeriod(this.otherTerms, null, null, $.proxy(this.drawGraph, this));
+      return DatabaseInterface.query({
+        terms: this.otherTerms.concat([this.term]),
+        callback: $.proxy(this.drawGraph, this),
+        useAnd: true,
+        pubid: this.options.pubid
+      });
     };
     SimilarityResult.prototype.drawGraph = function(code, results, duration) {
       this.sparkline = new HighlightableSparkline(this.graphContainer[0], results[0], {
@@ -73,6 +79,10 @@
       this.onRemoveCallback = onRemoveCallback;
       this.draw();
     }
+    ExtraTerm.prototype.remove = function() {
+      this.elm.remove();
+      return this.onRemoveCallback(this);
+    };
     ExtraTerm.prototype.draw = function() {
       var closeLink;
       this.elm = $('<span />', {
@@ -80,12 +90,11 @@
         text: this.term
       }).appendTo($('#js_extra_terms'));
       closeLink = $('<a />', {
-        text: 'X'
+        text: 'x'
       }).appendTo(this.elm);
       return closeLink.click(__bind(function(evt) {
         evt.preventDefault();
-        this.elm.remove();
-        return this.onRemoveCallback(this);
+        return this.remove();
       }, this));
     };
     return ExtraTerm;
@@ -110,18 +119,24 @@
       }, this));
     },
     loadData: function() {
+      var term;
       $('.js_roller').show();
-      this.term = $.trim(this.search.val());
+      term = $.trim(this.search.val());
+      this.search.val('');
       if (this.term === "") {
-        this.term = null;
+        term = null;
+      }
+      if (term) {
+        this.addTerm(term);
       }
       if (this.mainSparkline) {
         this.mainSparkline.clear();
       }
       DatabaseInterface.query({
-        terms: this.term,
+        terms: this.getSearchTerms(),
         callback: $.proxy(this.drawGraph, this),
-        pubid: this.getPubid()
+        pubid: this.getPubid(),
+        useAnd: true
       });
       return this.loadRelatedData();
     },
@@ -130,13 +145,19 @@
       $('#js_related_nouns_roller').show();
       this.loadTimeSpan();
       return DatabaseInterface.similarEntities({
-        terms: this.term,
+        terms: this.getSearchTerms(),
+        useAnd: true,
         startDate: this.timeSpan.start,
         endDate: this.timeSpan.end,
         callback: $.proxy(this.setRelatedNouns, this),
-        maxResults: 15,
+        maxResults: 20,
         pubid: this.getPubid(),
         type: this.getEntityType()
+      });
+    },
+    getSearchTerms: function() {
+      return $.map(this.terms, function(termObj) {
+        return termObj.term;
       });
     },
     drawGraph: function(code, results, duration) {
@@ -145,6 +166,10 @@
         return this.mainSparkline.setData(results[0]);
       } else {
         return this.mainSparkline = new EnhancedSparkline('#js_main_viz', results[0], {
+          width: 700,
+          xOffset: 20,
+          marginX: 30,
+          marginY: 10,
           onRescale: __bind(function(dateSpan) {
             $('#js_date_start').html(DateFormatter.format(dateSpan.start));
             return $('#js_date_end').html(DateFormatter.format(dateSpan.end));
@@ -180,11 +205,14 @@
       return this.setListValues('#js_related_nouns', results[0]['entity_'], results[0]['count_']);
     },
     addTerm: function(term) {
-      new ExtraTerm(term, __bind(function() {
-        this.terms.remove(term);
-        return this.loadData();
-      }, this));
-      return this.loadData();
+      var termObj;
+      if (this.getSearchTerms().indexOf(term) === -1) {
+        termObj = new ExtraTerm(term, __bind(function(thisTermObj) {
+          this.terms.remove(thisTermObj);
+          return this.loadData();
+        }, this));
+        return this.terms.push(termObj);
+      }
     },
     setTerm: function(term) {
       this.search.val(term);
@@ -203,10 +231,15 @@
         if (i > 9) {
           currentUl = $(ul + '3');
         }
-        sparkline = new SimilarityResult(currentUl, value, count, [], {
+        if (i > 14) {
+          currentUl = $(ul + '4');
+        }
+        sparkline = new SimilarityResult(currentUl, value, count, this.getSearchTerms(), {
           onClick: __bind(function(result) {
-            return this.setTerm(result.term);
-          }, this)
+            this.addTerm(result.term);
+            return this.loadData();
+          }, this),
+          pubid: this.getPubid()
         });
         _results.push(sparkline.highlight(this.timeSpan));
       }

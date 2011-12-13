@@ -40,7 +40,8 @@ li{
 .extra_term{
   position: relative;
   display:inline-block;
-  padding:5px;
+  padding:10px 20px;
+  margin:10px;
   background: #1e90ff;
   color:white;
 }
@@ -48,9 +49,8 @@ li{
   position: absolute;
   display: block;
   color:white;
-  border:1px solid white;
   top:0;
-  right:0;
+  right:3px;
   text-decoration:none;
 }
 #search-wrap {

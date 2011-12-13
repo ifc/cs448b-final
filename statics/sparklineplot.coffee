@@ -5,7 +5,8 @@ class SparklinePlot
     drawXLabels: false
     drawYLabels: true
     drawTicks: true
-    margin: 0
+    marginX: 0
+    marginY: 0
     color: 'blue'
     strokeWidth: 2 
     width: 958
@@ -24,12 +25,12 @@ class SparklinePlot
         .attr("height", @options.height)
     @g = @vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
     @setData(data) 
-
+  
   setData: (@data) ->
     @xmax = d3.max(@data)
     @ymax = data.length
-    yScaleBounds = [0 + @options.margin + @options.yOffset, @options.height - @options.margin + @options.yOffset]
-    xScaleBounds = [0 + @options.margin + @options.xOffset, @options.width - @options.margin + @options.xOffset]
+    yScaleBounds = [0 + @options.marginY + @options.yOffset, @options.height - @options.marginY + @options.yOffset]
+    xScaleBounds = [0 + @options.marginX + @options.xOffset, @options.width - @options.marginX + @options.xOffset]
     @yScale = d3.scale.linear().domain([0, @xmax]).range(yScaleBounds)
     @xScale = d3.scale.linear().domain([0, @ymax]).range(xScaleBounds)
     @draw()
@@ -121,6 +122,8 @@ class SparklinePlot
         .attr("y2", -1 * yfn(maxY))
         .attr("y2", -1 * yfn(maxY))
         
+  cssWidth: ->
+    return @options.width - @options.marginX
       
   dateToNumber: (dateObj) ->
     return dateObj.getFullYear() + dateObj.getMonth() / 12

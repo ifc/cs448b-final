@@ -7,7 +7,8 @@
       drawXLabels: false,
       drawYLabels: true,
       drawTicks: true,
-      margin: 0,
+      marginX: 0,
+      marginY: 0,
       color: 'blue',
       strokeWidth: 2,
       width: 958,
@@ -32,8 +33,8 @@
       this.data = data;
       this.xmax = d3.max(this.data);
       this.ymax = data.length;
-      yScaleBounds = [0 + this.options.margin + this.options.yOffset, this.options.height - this.options.margin + this.options.yOffset];
-      xScaleBounds = [0 + this.options.margin + this.options.xOffset, this.options.width - this.options.margin + this.options.xOffset];
+      yScaleBounds = [0 + this.options.marginY + this.options.yOffset, this.options.height - this.options.marginY + this.options.yOffset];
+      xScaleBounds = [0 + this.options.marginX + this.options.xOffset, this.options.width - this.options.marginX + this.options.xOffset];
       this.yScale = d3.scale.linear().domain([0, this.xmax]).range(yScaleBounds);
       this.xScale = d3.scale.linear().domain([0, this.ymax]).range(xScaleBounds);
       return this.draw();
