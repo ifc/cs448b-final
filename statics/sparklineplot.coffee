@@ -46,7 +46,7 @@ class SparklinePlot
     @drawGraphAxis(@xScale, @yScale, @ymax, @xmax)
     
     #Draw the Y axis if necessary
-    @drawGraphLabels(@xScale, @yScale, @options.yOffset)   
+    @drawGraphLabels( @yScale, @options.yOffset)   
     @drawGraphTicks(@xScale, @yScale) if @options.drawTicks
     
   getLine: (interpolation, tension, xfn, yfn) ->
@@ -85,15 +85,19 @@ class SparklinePlot
         .attr("y2", (d) -> -1 * yfn(d))
         .attr("x2", xfn(0))
         
-  drawGraphLabels: (xfn, yfn, yOffset) ->
+  drawGraphLabels: (yfn, yOffset) ->
     if @options.drawXLabels
+      xLabels = [
+        {date: @options.startDate, pos: @chartOffsetLeft() + 10},
+        {date: @options.endDate, pos: @chartOffsetLeft() + @chartWidth() - 14}
+      ]
       @g.selectAll(".xLabel")
-          .data(xfn.ticks(5))
+          .data(xLabels)
           .enter().append("svg:text")
           .attr("class", "xLabel")
-          .text(String)
-          .attr("x", (d) -> xfn(d))
-          .attr("y", -1*yOffset)
+          .text((d) -> d.date.getFullYear())
+          .attr("x", (d) -> d.pos)
+          .attr("y", -1 * yOffset)
           .attr("text-anchor", "middle")
     
     if @options.drawYLabels
@@ -122,8 +126,11 @@ class SparklinePlot
         .attr("y2", -1 * yfn(maxY))
         .attr("y2", -1 * yfn(maxY))
         
-  cssWidth: ->
-    return @options.width - @options.marginX
+  chartWidth: ->
+    return @options.width - 2 * @options.marginX
+      
+  chartOffsetLeft: ->
+    return @options.marginX + @options.xOffset    
       
   dateToNumber: (dateObj) ->
     return dateObj.getFullYear() + dateObj.getMonth() / 12

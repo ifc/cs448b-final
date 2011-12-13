@@ -45,7 +45,7 @@
       lineFn = this.getLine(this.options.interpolation, this.options.tension, this.xScale, this.yScale);
       this.path = this.g.append("svg:path").attr("d", lineFn(this.data)).attr("style", "stroke: " + this.options.color + "; stroke-width: " + this.options.strokeWidth + "px;");
       this.drawGraphAxis(this.xScale, this.yScale, this.ymax, this.xmax);
-      this.drawGraphLabels(this.xScale, this.yScale, this.options.yOffset);
+      this.drawGraphLabels(this.yScale, this.options.yOffset);
       if (this.options.drawTicks) {
         return this.drawGraphTicks(this.xScale, this.yScale);
       }
@@ -79,10 +79,22 @@
         return -1 * yfn(d);
       }).attr("x2", xfn(0));
     };
-    SparklinePlot.prototype.drawGraphLabels = function(xfn, yfn, yOffset) {
+    SparklinePlot.prototype.drawGraphLabels = function(yfn, yOffset) {
+      var xLabels;
       if (this.options.drawXLabels) {
-        this.g.selectAll(".xLabel").data(xfn.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
-          return xfn(d);
+        xLabels = [
+          {
+            date: this.options.startDate,
+            pos: this.chartOffsetLeft() + 10
+          }, {
+            date: this.options.endDate,
+            pos: this.chartOffsetLeft() + this.chartWidth() - 14
+          }
+        ];
+        this.g.selectAll(".xLabel").data(xLabels).enter().append("svg:text").attr("class", "xLabel").text(function(d) {
+          return d.date.getFullYear();
+        }).attr("x", function(d) {
+          return d.pos;
         }).attr("y", -1 * yOffset).attr("text-anchor", "middle");
       }
       if (this.options.drawYLabels) {
@@ -94,6 +106,12 @@
     SparklinePlot.prototype.drawGraphAxis = function(xfn, yfn, maxX, maxY) {
       this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(maxX)).attr("y2", -1 * yfn(0));
       return this.g.append("svg:line").attr("x1", xfn(0)).attr("y1", -1 * yfn(0)).attr("x2", xfn(0)).attr("y2", -1 * yfn(maxY)).attr("y2", -1 * yfn(maxY));
+    };
+    SparklinePlot.prototype.chartWidth = function() {
+      return this.options.width - 2 * this.options.marginX;
+    };
+    SparklinePlot.prototype.chartOffsetLeft = function() {
+      return this.options.marginX + this.options.xOffset;
     };
     SparklinePlot.prototype.dateToNumber = function(dateObj) {
       return dateObj.getFullYear() + dateObj.getMonth() / 12;

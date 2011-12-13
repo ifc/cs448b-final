@@ -114,9 +114,23 @@
           return this.loadRelatedData();
         }
       }, this));
-      return $('#js_filter_newspapers').change(__bind(function() {
+      $('#js_filter_newspapers').change(__bind(function() {
         return this.loadData();
       }, this));
+      $('#js_filter_entities').buttonset();
+      $("#help-dialog").dialog({
+        autoOpen: false,
+        height: 400,
+        modal: true,
+        width: 600,
+        show: "fade",
+        hide: "fade"
+      });
+      return $('.help-link').click(function() {
+        $("#help-dialog").css("visibility", "visible");
+        $("#help-dialog").dialog("open");
+        return false;
+      });
     },
     loadData: function() {
       var term;
@@ -169,7 +183,8 @@
           width: 700,
           xOffset: 20,
           marginX: 30,
-          marginY: 10,
+          marginY: 15,
+          drawXLabels: true,
           onRescale: __bind(function(dateSpan) {
             $('#js_date_start').html(DateFormatter.format(dateSpan.start));
             return $('#js_date_end').html(DateFormatter.format(dateSpan.end));

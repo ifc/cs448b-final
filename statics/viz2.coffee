@@ -72,6 +72,20 @@ Viz2 =
     $('#js_filter_entities').change => @loadRelatedData() if @mainSparkline
     $('#js_filter_newspapers').change => @loadData()
     
+    $('#js_filter_entities').buttonset();
+
+    $( "#help-dialog" ).dialog
+      autoOpen: false
+      height: 400
+      modal: true
+      width: 600
+      show: "fade"
+      hide: "fade"
+    $('.help-link').click ->
+      $( "#help-dialog" ).css("visibility", "visible")
+      $( "#help-dialog" ).dialog( "open" )
+      return false
+    
   loadData: ->
     $('.js_roller').show()
     term = $.trim(@search.val())
@@ -114,7 +128,8 @@ Viz2 =
         width: 700
         xOffset: 20
         marginX: 30
-        marginY: 10
+        marginY: 15
+        drawXLabels: true
         onRescale: (dateSpan) =>
           $('#js_date_start').html(DateFormatter.format(dateSpan.start))
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))

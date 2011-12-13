@@ -12,9 +12,15 @@ class EnhancedSparkline extends SparklinePlot
     super()
     unless @rangeSelector
       @selectorOffsetLeft = 0
-      @selectorWidth = @options.width
+      @selectorWidth = @chartWidth()
       @rangeSelector = $('<div />', {class: 'range_selector'}).appendTo(@container)
-      @rangeSelector.css({width: @options.width + 'px', height: (@options.height + 10) + 'px', position: 'absolute', left: 0, top: '-5px'})
+      @rangeSelector.css(
+        width: @chartWidth() + 'px' 
+        height: (@options.height + 10) + 'px'
+        position: 'absolute'
+        left: @chartOffsetLeft() + 'px'
+        top: '-5px'
+      )
       handleCss = 
         position: 'absolute'
         top: (@options.height / 2) + 5
@@ -47,13 +53,13 @@ class EnhancedSparkline extends SparklinePlot
     
   startSlide: (evt) ->
     evt.preventDefault()
-    if @options.width > @selectorWidth
+    if @chartWidth() > @selectorWidth
       @sliding = true
       @slideStartPos = evt.pageX
       @slideStartOffset = @selectorOffsetLeft
     
   updateSliding: (x) ->
-    maxLeftOffset = @options.width - @selectorWidth
+    maxLeftOffset = @chartWidth() - @selectorWidth
     if maxLeftOffset > 0
       delta = x - @slideStartPos
       newOffset = @slideStartOffset + delta
@@ -65,8 +71,8 @@ class EnhancedSparkline extends SparklinePlot
   
   updateDragging: (x) ->
     offsetLeft = @dragStartProperties.offsetLeft
-    offsetRight = @options.width - (@dragStartProperties.width + offsetLeft)
-    maxWidth = if @draggingHandle == @leftHandle then @options.width - offsetRight else @options.width - offsetLeft
+    offsetRight = @chartWidth() - (@dragStartProperties.width + offsetLeft)
+    maxWidth = if @draggingHandle == @leftHandle then @chartWidth() - offsetRight else @chartWidth() - offsetLeft
     delta = x - @dragStartPos
     delta = -1 * delta if @draggingHandle == @leftHandle
     
@@ -74,12 +80,12 @@ class EnhancedSparkline extends SparklinePlot
     newWidth = 10 if newWidth < 10
     newWidth = maxWidth if newWidth > maxWidth
     newOffset = if @draggingHandle == @leftHandle then @dragStartProperties.offsetLeft - delta else @dragStartProperties.offsetLeft
-    newOffset = @options.width - 10 if newOffset > @options.width - 10
+    newOffset = @chartWidth() - 10 if newOffset > @chartWidth() - 10
     newOffset = 0 if newOffset < 0
     @selectorOffsetLeft = newOffset
     @selectorWidth = newWidth
-    @rangeSelector.css({left: newOffset + 'px', width: newWidth + 'px'})
-    if @selectorWidth < @options.width
+    @rangeSelector.css({left: @chartOffsetLeft() + newOffset + 'px', width: newWidth + 'px'})
+    if @selectorWidth < @chartWidth()
       @rangeSelector.addClass('slidable')
     else
       @rangeSelector.removeClass('slidable')
@@ -88,8 +94,8 @@ class EnhancedSparkline extends SparklinePlot
   getDateRange: ->
     startDateNumber = @dateToNumber(@options.startDate)
     maxSpan = @dateToNumber(@options.endDate) - startDateNumber
-    spanPercent = @selectorWidth / @options.width
-    spanStart = @selectorOffsetLeft / @options.width
+    spanPercent = @selectorWidth / @chartWidth()
+    spanStart = @selectorOffsetLeft / @chartWidth()
     dateRangeSpanNumber = spanPercent * maxSpan
     dateRangeStartNumber = startDateNumber + spanStart * maxSpan
     dateRangeStart = @numberToDate(dateRangeStartNumber)

@@ -20,6 +20,10 @@ li{
   margin: auto;
   text-align: left;
 }
+.chart_label{
+  text-align: center;
+  margin-bottom: 5px;
+}
 
 #thank-yous-wrap {
   margin-top: 70px;
@@ -32,6 +36,7 @@ li{
 }
 .date_span_text span{
   font-weight:bold;
+  font-size:16px;
 }
 
 .extra_terms {
@@ -115,7 +120,7 @@ li{
 .minigraph {
   height:20px;
 }
-.viz_top, .main_viz{
+.viz_top{
   margin:20px 0;
   overflow:auto;
   /*border:1px solid #777; */
@@ -153,8 +158,6 @@ line {
 .slidable{
   cursor: move;
 }
-
-.date_span_text { font-size: 18px;}
 .viz_top {
   box-shadow: rgba(0,0,0,0.4) 2px 2px;
   background-color: #fff;
