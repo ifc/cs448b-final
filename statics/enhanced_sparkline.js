@@ -30,16 +30,16 @@
       var handleCss;
       EnhancedSparkline.__super__.draw.call(this);
       if (!this.rangeSelector) {
-        this.selectorOffsetLeft = 0;
-        this.selectorWidth = this.chartWidth();
+        this.selectorOffsetLeft = 20;
+        this.selectorWidth = this.chartWidth() - 40;
         this.rangeSelector = $('<div />', {
           "class": 'range_selector'
         }).appendTo(this.container);
         this.rangeSelector.css({
-          width: this.chartWidth() + 'px',
+          width: this.selectorWidth + 'px',
           height: (this.options.height + 10) + 'px',
           position: 'absolute',
-          left: this.chartOffsetLeft() + 'px',
+          left: this.chartOffsetLeft() + this.selectorOffsetLeft + 'px',
           top: '-5px'
         });
         handleCss = {

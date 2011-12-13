@@ -24,6 +24,10 @@ li{
   text-align: center;
   margin-bottom: 5px;
 }
+.chart_label span{
+  font-weight:bold;
+  font-size:14px;
+}
 
 #thank-yous-wrap {
   margin-top: 70px;
@@ -89,6 +93,11 @@ li{
   float:left;
   margin-left:20px;
 }
+.attribute_list_header{
+  float:left;
+  margin-left:20px;
+  width:500px;
+}
 .lists{
   height:250px;
 }
@@ -128,6 +137,10 @@ li{
 .main_viz {
   height:160px;
   /*left: 170px;*/
+}
+.subtext{
+  font-size:10px;
+  color: #999999;
 }
 .cleared {
   clear:both;

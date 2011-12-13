@@ -11,14 +11,14 @@ class EnhancedSparkline extends SparklinePlot
   draw: ->
     super()
     unless @rangeSelector
-      @selectorOffsetLeft = 0
-      @selectorWidth = @chartWidth()
+      @selectorOffsetLeft = 20
+      @selectorWidth = @chartWidth() - 40
       @rangeSelector = $('<div />', {class: 'range_selector'}).appendTo(@container)
       @rangeSelector.css(
-        width: @chartWidth() + 'px' 
+        width: @selectorWidth + 'px' 
         height: (@options.height + 10) + 'px'
         position: 'absolute'
-        left: @chartOffsetLeft() + 'px'
+        left: @chartOffsetLeft() + @selectorOffsetLeft + 'px'
         top: '-5px'
       )
       handleCss = 

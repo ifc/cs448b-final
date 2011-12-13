@@ -48,7 +48,10 @@
       			</form>
       		</div>
       		<div class="main_viz_container">
-      			<div class="chart_label">Total articles / month</div>
+      			<div class="chart_label">
+      				Total articles / month for 
+      				<span id="js_current_term">All Articles</span>
+      			</div>
 	        	<div class="main_viz" id="js_main_viz">
 	        		<img src="statics/images/roller.gif" id="js_sparkline_roller" class="js_roller" />            		
 	        	</div>
@@ -64,8 +67,11 @@
           	<div class="viz_top"> 
           		<div class="left_side">
 	            	<div class="top_labels">
-	            		<h2 class="attribute_list">
+	            		<h2 class="attribute_list_header">
 	            			Related Terms
+	            			<span class="subtext">
+	            				(click on a term to switch your search)
+	            			</span>
 	            		</h2>
 	            		
 	            		<div id="js_filter_entities">

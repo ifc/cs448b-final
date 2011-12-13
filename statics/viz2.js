@@ -136,18 +136,15 @@
       var term;
       $('.js_roller').show();
       term = $.trim(this.search.val());
-      this.search.val('');
-      if (this.term === "") {
+      if (term === "") {
         term = null;
       }
-      if (term) {
-        this.addTerm(term);
-      }
+      this.setTerm(term);
       if (this.mainSparkline) {
         this.mainSparkline.clear();
       }
       DatabaseInterface.query({
-        terms: this.getSearchTerms(),
+        terms: term,
         callback: $.proxy(this.drawGraph, this),
         pubid: this.getPubid(),
         useAnd: true
@@ -233,7 +230,7 @@
     },
     setTerm: function(term) {
       this.search.val(term);
-      return this.loadData();
+      return $('#js_current_term').text(term || 'All Articles');
     },
     setListValues: function(ul, values, counts) {
       var count, currentUl, i, sparkline, value, _len, _results;
@@ -251,9 +248,9 @@
         if (i > 14) {
           currentUl = $(ul + '4');
         }
-        sparkline = new SimilarityResult(currentUl, value, count, this.getSearchTerms(), {
+        sparkline = new SimilarityResult(currentUl, value, count, [], {
           onClick: __bind(function(result) {
-            this.addTerm(result.term);
+            this.setTerm(result.term);
             return this.loadData();
           }, this),
           pubid: this.getPubid()

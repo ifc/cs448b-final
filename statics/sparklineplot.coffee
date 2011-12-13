@@ -112,7 +112,7 @@ class SparklinePlot
           .data(yfn.ticks(4))
           .enter().append("svg:text")
           .attr("class", "yLabel")
-          .text(String)
+          .text((d) -> NumberFormatter.format(d))
           .attr("y", (d) -> -1 * yfn(d))
           .attr("text-anchor", "right")
           .attr("dy", 4)
@@ -191,9 +191,13 @@ window.PopupBox =
     elm.show()
     elm.css('left', x + 5 + 'px').css('top', y + 5 + 'px')
     elm.children('div').text(header)
-    elm.children('p').text(text)
+    elm.children('p').text(NumberFormatter.format(text) + " articles")
   hide: ->
     $('#js_viz_popup').hide()
+    
+window.NumberFormatter = 
+  format: (number) ->
+   return number.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")    
     
 window.DateFormatter =
   months:

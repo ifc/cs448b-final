@@ -110,7 +110,9 @@
         }).attr("y", -1 * yOffset).attr("text-anchor", "middle");
       }
       if (this.options.drawYLabels) {
-        return this.g.selectAll(".yLabel").data(yfn.ticks(4)).enter().append("svg:text").attr("class", "yLabel").text(String).attr("y", function(d) {
+        return this.g.selectAll(".yLabel").data(yfn.ticks(4)).enter().append("svg:text").attr("class", "yLabel").text(function(d) {
+          return NumberFormatter.format(d);
+        }).attr("y", function(d) {
           return -1 * yfn(d);
         }).attr("text-anchor", "right").attr("dy", 4);
       }
@@ -186,10 +188,15 @@
       elm.show();
       elm.css('left', x + 5 + 'px').css('top', y + 5 + 'px');
       elm.children('div').text(header);
-      return elm.children('p').text(text);
+      return elm.children('p').text(NumberFormatter.format(text) + " articles");
     },
     hide: function() {
       return $('#js_viz_popup').hide();
+    }
+  };
+  window.NumberFormatter = {
+    format: function(number) {
+      return number.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
     }
   };
   window.DateFormatter = {

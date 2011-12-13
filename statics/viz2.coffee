@@ -89,12 +89,13 @@ Viz2 =
   loadData: ->
     $('.js_roller').show()
     term = $.trim(@search.val())
-    @search.val('')
-    term = null if @term == ""
-    @addTerm(term) if term
+    #@search.val('')
+    term = null if term == ""
+    @setTerm(term)
+    #@addTerm(term) if term
     @mainSparkline.clear() if @mainSparkline
     DatabaseInterface.query(
-      terms: @getSearchTerms()
+      terms: term #@getSearchTerms()
       callback: $.proxy(@drawGraph, this)
       pubid: @getPubid()
       useAnd: true
@@ -163,7 +164,7 @@ Viz2 =
         
   setTerm: (term) ->
     @search.val(term)
-    @loadData()
+    $('#js_current_term').text(term || 'All Articles')
     
   setListValues: (ul, values, counts) ->
     currentUl = $(ul)
@@ -172,7 +173,7 @@ Viz2 =
       currentUl = $(ul + '2') if i > 4
       currentUl = $(ul + '3') if i > 9
       currentUl = $(ul + '4') if i > 14
-      sparkline = new SimilarityResult(currentUl, value, count, @getSearchTerms(),
+      sparkline = new SimilarityResult(currentUl, value, count, [], #@getSearchTerms(),
         onClick: (result) =>
           @setTerm(result.term)
           #@addTerm(result.term)
