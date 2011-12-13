@@ -1,5 +1,5 @@
 (function() {
-  var DateFormatter, ExtraTerm, SimilarityResult, Viz2;
+  var ExtraTerm, SimilarityResult, Viz2;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   SimilarityResult = (function() {
     SimilarityResult.prototype.defaultOptions = {
@@ -181,10 +181,12 @@
       } else {
         return this.mainSparkline = new EnhancedSparkline('#js_main_viz', results[0], {
           width: 700,
+          height: 150,
           xOffset: 20,
           marginX: 30,
           marginY: 15,
           drawXLabels: true,
+          popup: true,
           onRescale: __bind(function(dateSpan) {
             $('#js_date_start').html(DateFormatter.format(dateSpan.start));
             return $('#js_date_end').html(DateFormatter.format(dateSpan.end));
@@ -259,27 +261,6 @@
         _results.push(sparkline.highlight(this.timeSpan));
       }
       return _results;
-    }
-  };
-  DateFormatter = {
-    months: {
-      0: 'January',
-      1: 'February',
-      2: 'March',
-      3: 'April',
-      4: 'May',
-      5: 'June',
-      6: 'July',
-      7: 'August',
-      8: 'September',
-      9: 'October',
-      10: 'November',
-      11: 'December'
-    },
-    format: function(date) {
-      var month;
-      month = this.months[date.getMonth()];
-      return month + ' ' + date.getFullYear();
     }
   };
   window.Viz2 = Viz2;

@@ -126,7 +126,7 @@ li{
   /*border:1px solid #777; */
 }
 .main_viz {
-  height:110px;
+  height:160px;
   /*left: 170px;*/
 }
 .cleared {
@@ -135,10 +135,30 @@ li{
 .cleared_left{
   clear:left;
 }
+.overlay{
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 1px solid #212121;
+  background:white;
+}
+.overlay .header{
+  padding:2px;
+  background: #212121;
+  color:white;
+  font-weight:bold;
+}
+.overlay p{
+  padding:2px;
+  margin:0;
+}
 path {
     stroke: green;
     stroke-width: 2;
     fill: none;
+}
+.hl_path path{
+  stroke-width: 4;
 }
 line {
   stroke: black;
@@ -148,7 +168,7 @@ line {
 .range_selector {
   opacity:0.4;
   filter:alpha(opacity=40); /* For IE8 and earlier */
-  background: #ffffb2;
+  background: #ffff79;
 }
 .range_selector .handle{
   border:1px solid black;

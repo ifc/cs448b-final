@@ -48,11 +48,13 @@ class EnhancedSparkline extends SparklinePlot
   startDrag: (evt, handle) ->
     evt.preventDefault()
     @draggingHandle = handle
+    PopupBox.hide()
     @dragStartProperties = {offsetLeft: @selectorOffsetLeft, width: @selectorWidth}
     @dragStartPos = evt.pageX
     
   startSlide: (evt) ->
     evt.preventDefault()
+    PopupBox.hide()
     if @chartWidth() > @selectorWidth
       @sliding = true
       @slideStartPos = evt.pageX
@@ -65,9 +67,12 @@ class EnhancedSparkline extends SparklinePlot
       newOffset = @slideStartOffset + delta
       newOffset = 0 if newOffset < 0
       newOffset = maxLeftOffset if newOffset > maxLeftOffset
-      @rangeSelector.css(left: newOffset + 'px')
+      @rangeSelector.css(left: @chartOffsetLeft() + newOffset + 'px')
       @selectorOffsetLeft = newOffset
       @options.onRescale(@getDateRange())
+  
+  handleMouseover: (evt) ->
+    super(evt) unless @draggingHandle || @sliding
   
   updateDragging: (x) ->
     offsetLeft = @dragStartProperties.offsetLeft

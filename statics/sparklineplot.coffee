@@ -13,6 +13,7 @@ class SparklinePlot
     height: 100
     xOffset: 0
     yOffset: 0
+    popup: false
     startDate: new Date(2000,0)
     endDate: new Date(2010, 11)
   
@@ -24,7 +25,12 @@ class SparklinePlot
         .attr("width", @options.width)
         .attr("height", @options.height)
     @g = @vis.append("svg:g").attr("transform", "translate(0, #{@options.height})")
-    @setData(data) 
+    @setData(data)
+    @container.mousemove (evt) => 
+      @handleMouseover(evt) if @options.popup   
+    $('body').mouseover (evt) =>
+      @container.removeClass('hl_path')
+      PopupBox.hide()
   
   setData: (@data) ->
     @xmax = d3.max(@data)
@@ -33,6 +39,7 @@ class SparklinePlot
     xScaleBounds = [0 + @options.marginX + @options.xOffset, @options.width - @options.marginX + @options.xOffset]
     @yScale = d3.scale.linear().domain([0, @xmax]).range(yScaleBounds)
     @xScale = d3.scale.linear().domain([0, @ymax]).range(xScaleBounds)
+    @xinv = d3.scale.linear().domain(xScaleBounds).range([0, @ymax]);
     @draw()
     
   draw: ->
@@ -40,7 +47,7 @@ class SparklinePlot
     lineFn = @getLine(@options.interpolation, @options.tension, @xScale, @yScale)
     @path = @g.append("svg:path")
         .attr("d", lineFn(@data))
-        .attr("style", "stroke: #{@options.color}; stroke-width: #{@options.strokeWidth}px;");
+        .attr("style", "stroke: #{@options.color}; stroke-width: #{@options.strokeWidth}px;")
 
     #Draw the X axis
     @drawGraphAxis(@xScale, @yScale, @ymax, @xmax)
@@ -126,11 +133,49 @@ class SparklinePlot
         .attr("y2", -1 * yfn(maxY))
         .attr("y2", -1 * yfn(maxY))
         
+  handleMouseover: (evt) ->
+    evt.preventDefault()
+    evt.stopPropagation()
+    offset = @container.offset()
+    relX = evt.pageX - offset.left
+    relY = evt.pageY - offset.top
+    if relX > @chartOffsetLeft() && relX < @chartOffsetLeft() + @chartWidth() && relY > @chartOffsetTop() && relY < @chartOffsetTop() + @chartHeight()
+      date = @getDateFromChartPos(relX - @chartOffsetLeft())
+      val = @getValueForDate(date)
+      realYPos = @options.height - @yScale(val)
+      if Math.abs(relY - realYPos) < 20
+        PopupBox.draw(evt.pageX, evt.pageY, DateFormatter.format(date), val)
+        @container.addClass('hl_path')
+      else
+        @container.removeClass('hl_path')
+        PopupBox.hide()
+        
   chartWidth: ->
     return @options.width - 2 * @options.marginX
+    
+  chartHeight: ->
+    return @options.height - 2 * @options.marginY
+      
+  chartOffsetTop: ->
+    return @options.marginY + @options.yOffset    
       
   chartOffsetLeft: ->
     return @options.marginX + @options.xOffset    
+      
+  getDateFromChartPos: (chartPos) ->
+    spanPercent = chartPos / @chartWidth()
+    return @numberToDate(@fullDateNumberSpan() * spanPercent + @startDateNumber())
+    
+  getValueForDate: (date) ->
+    spanPercent = (@dateToNumber(date) - @startDateNumber()) / @fullDateNumberSpan()
+    dataX = Math.round((@data.length - 1) * spanPercent)
+    return @data[dataX]
+    
+  startDateNumber: ->
+    return @dateToNumber(@options.startDate)
+      
+  fullDateNumberSpan: ->
+    return @dateToNumber(@options.endDate) - @startDateNumber()
       
   dateToNumber: (dateObj) ->
     return dateObj.getFullYear() + dateObj.getMonth() / 12
@@ -139,5 +184,34 @@ class SparklinePlot
     month = Math.round((number % 1) * 12)
     year = Math.floor(number)
     return new Date(year, month)
+    
+window.PopupBox = 
+  draw: (x, y, header, text)->
+    elm = $('#js_viz_popup')
+    elm.show()
+    elm.css('left', x + 5 + 'px').css('top', y + 5 + 'px')
+    elm.children('div').text(header)
+    elm.children('p').text(text)
+  hide: ->
+    $('#js_viz_popup').hide()
+    
+window.DateFormatter =
+  months:
+    0: 'January'
+    1: 'February'
+    2: 'March'
+    3: 'April'
+    4: 'May'
+    5: 'June'
+    6: 'July'
+    7: 'August'
+    8: 'September'
+    9: 'October'
+    10: 'November'
+    11: 'December'
+  format: (date) ->
+    month = @months[date.getMonth()]
+    return month + ' ' + date.getFullYear()  
+    
         
 window.SparklinePlot = SparklinePlot

@@ -88,6 +88,7 @@
     EnhancedSparkline.prototype.startDrag = function(evt, handle) {
       evt.preventDefault();
       this.draggingHandle = handle;
+      PopupBox.hide();
       this.dragStartProperties = {
         offsetLeft: this.selectorOffsetLeft,
         width: this.selectorWidth
@@ -96,6 +97,7 @@
     };
     EnhancedSparkline.prototype.startSlide = function(evt) {
       evt.preventDefault();
+      PopupBox.hide();
       if (this.chartWidth() > this.selectorWidth) {
         this.sliding = true;
         this.slideStartPos = evt.pageX;
@@ -115,10 +117,15 @@
           newOffset = maxLeftOffset;
         }
         this.rangeSelector.css({
-          left: newOffset + 'px'
+          left: this.chartOffsetLeft() + newOffset + 'px'
         });
         this.selectorOffsetLeft = newOffset;
         return this.options.onRescale(this.getDateRange());
+      }
+    };
+    EnhancedSparkline.prototype.handleMouseover = function(evt) {
+      if (!(this.draggingHandle || this.sliding)) {
+        return EnhancedSparkline.__super__.handleMouseover.call(this, evt);
       }
     };
     EnhancedSparkline.prototype.updateDragging = function(x) {

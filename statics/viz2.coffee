@@ -126,10 +126,12 @@ Viz2 =
     else
       @mainSparkline = new EnhancedSparkline('#js_main_viz', results[0],
         width: 700
+        height:150
         xOffset: 20
         marginX: 30
         marginY: 15
         drawXLabels: true
+        popup: true
         onRescale: (dateSpan) =>
           $('#js_date_start').html(DateFormatter.format(dateSpan.start))
           $('#js_date_end').html(DateFormatter.format(dateSpan.end))
@@ -172,30 +174,12 @@ Viz2 =
       currentUl = $(ul + '4') if i > 14
       sparkline = new SimilarityResult(currentUl, value, count, @getSearchTerms(),
         onClick: (result) =>
-          #@setTerm(result.term)
-          @addTerm(result.term)
+          @setTerm(result.term)
+          #@addTerm(result.term)
           @loadData()
         pubid: @getPubid()
       )
       sparkline.highlight(@timeSpan)
-
-DateFormatter =
-  months:
-    0: 'January'
-    1: 'February'
-    2: 'March'
-    3: 'April'
-    4: 'May'
-    5: 'June'
-    6: 'July'
-    7: 'August'
-    8: 'September'
-    9: 'October'
-    10: 'November'
-    11: 'December'
-  format: (date) ->
-    month = @months[date.getMonth()]
-    return month + ' ' + date.getFullYear()
 
 window.Viz2 = Viz2
     
