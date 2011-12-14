@@ -158,7 +158,7 @@
       this.loadTimeSpan();
       this.pushStateToHash();
       return DatabaseInterface.similarEntities({
-        terms: this.getSearchTerms(),
+        terms: this.term,
         useAnd: true,
         startDate: this.timeSpan.start,
         endDate: this.timeSpan.end,

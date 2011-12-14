@@ -109,7 +109,7 @@ Viz2 =
     @loadTimeSpan()
     @pushStateToHash()
     DatabaseInterface.similarEntities(
-      terms: @getSearchTerms()
+      terms: @term #@getSearchTerms()
       useAnd: true
       startDate: @timeSpan.start
       endDate: @timeSpan.end
